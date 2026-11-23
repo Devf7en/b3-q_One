@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {analyzeImpact} from '../packages/infrastructure-intelligence/index.mjs';
+const graph=JSON.parse(readFileSync(new URL('../packages/infrastructure-intelligence/demo-graph.json',import.meta.url)));
+test('transitive impact and shortest dependency path',()=>{const r=analyzeImpact(graph,'prod-db');assert.equal(r.count,5);assert.deepEqual(r.affected.find(n=>n.id==='storefront').path,['prod-db','api-gateway','checkout-svc','storefront']);assert.equal(r.state,'simulation');});
+test('cycles terminate without duplicate impact',()=>{assert.equal(analyzeImpact({...graph,edges:[...graph.edges,{from:'storefront',to:'prod-db'}]},'prod-db').count,5);});
+test('isolated leaf and invalid graph',()=>{assert.equal(analyzeImpact(graph,'storefront').count,0);assert.throws(()=>analyzeImpact(graph,'missing'));assert.throws(()=>analyzeImpact({...graph,edges:[{from:'missing',to:'prod-db'}]},'prod-db'));});
