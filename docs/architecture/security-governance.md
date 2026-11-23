@@ -1,0 +1,3 @@
+# W10 and W12 security governance
+
+Demonstration release evaluation requires build, tests, dependency scan, secret scan and policy evidence. Missing, duplicate, failing or malformed gate records block review. Open high and critical findings block review. Passing fixtures never authorize deployment. Production requires authenticated evidence, artifact binding, freshness enforcement, tenant isolation, policy versions, independent approval and audit. No scanner, model provider or remediation executor is connected. Preserve approved W10 and W12 visual baselines. Model usage governance and incident lifecycle remain next steps.
