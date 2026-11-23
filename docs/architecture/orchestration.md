@@ -1,0 +1,3 @@
+# W13 and W16 orchestration
+
+The pure workflow planner validates dependency order and marks change steps for approval. The delegation planner compares illustrative model allowlists, permission sets and integer micro-USD budgets. Client inputs are not authoritative policy. Neither planner executes tasks. Production requires server-side identity, scoped policy, budget reservation, idempotency, immutable approval binding, durable traces, cancellation and verified adapters. n8n and b3Ɛq Intelligence are integration targets, not connected services. Preserve the original specialized workspace designs.
