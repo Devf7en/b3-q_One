@@ -1,0 +1,383 @@
+{
+  "version": "1.0.0",
+  "presets": [
+    {
+      "workspaceId": "W01",
+      "visualProfile": "operations",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "topology",
+          "span": 2
+        },
+        {
+          "id": "telemetry",
+          "span": 1
+        },
+        {
+          "id": "incidents",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W02",
+      "visualProfile": "business",
+      "density": "comfortable",
+      "panels": [
+        {
+          "id": "customers",
+          "span": 1
+        },
+        {
+          "id": "hosting",
+          "span": 1
+        },
+        {
+          "id": "subscriptions",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W03",
+      "visualProfile": "conversation",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "assistant",
+          "span": 1
+        },
+        {
+          "id": "plans",
+          "span": 1
+        },
+        {
+          "id": "approvals",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W04",
+      "visualProfile": "developer",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "repositories",
+          "span": 1
+        },
+        {
+          "id": "pipelines",
+          "span": 1
+        },
+        {
+          "id": "containers",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W05",
+      "visualProfile": "spatial",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "graph",
+          "span": 2
+        },
+        {
+          "id": "regions",
+          "span": 1
+        },
+        {
+          "id": "networks",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W06",
+      "visualProfile": "executive",
+      "density": "comfortable",
+      "panels": [
+        {
+          "id": "cost",
+          "span": 1
+        },
+        {
+          "id": "risk",
+          "span": 1
+        },
+        {
+          "id": "outcomes",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W07",
+      "visualProfile": "canvas",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "custom-panels",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W08",
+      "visualProfile": "risk-graph",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "intent-graph",
+          "span": 2
+        },
+        {
+          "id": "blast-radius",
+          "span": 1
+        },
+        {
+          "id": "risk",
+          "span": 1
+        },
+        {
+          "id": "ownership",
+          "span": 1
+        },
+        {
+          "id": "deployment-validation",
+          "span": 1
+        },
+        {
+          "id": "code-cloud-business",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W09",
+      "visualProfile": "code-console",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "terminal",
+          "span": 1
+        },
+        {
+          "id": "code-understanding",
+          "span": 1
+        },
+        {
+          "id": "assistant",
+          "span": 1
+        },
+        {
+          "id": "model-routing",
+          "span": 1
+        },
+        {
+          "id": "preferences",
+          "span": 1
+        },
+        {
+          "id": "command-runner",
+          "span": 1
+        },
+        {
+          "id": "session-history",
+          "span": 1
+        },
+        {
+          "id": "integrations",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W10",
+      "visualProfile": "devsecops",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "model-selection",
+          "span": 1
+        },
+        {
+          "id": "token-metering",
+          "span": 1
+        },
+        {
+          "id": "pipeline",
+          "span": 1
+        },
+        {
+          "id": "incidents",
+          "span": 1
+        },
+        {
+          "id": "enterprise-policy",
+          "span": 1
+        },
+        {
+          "id": "service-status",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W11",
+      "visualProfile": "engineering",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "ssh",
+          "span": 1
+        },
+        {
+          "id": "api-explorer",
+          "span": 1
+        },
+        {
+          "id": "processes",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W12",
+      "visualProfile": "security",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "threats",
+          "span": 1
+        },
+        {
+          "id": "identity",
+          "span": 1
+        },
+        {
+          "id": "firewall",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W13",
+      "visualProfile": "workflow",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "workflow-editor",
+          "span": 2
+        },
+        {
+          "id": "triggers",
+          "span": 1
+        },
+        {
+          "id": "traces",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W14",
+      "visualProfile": "finance",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "budgets",
+          "span": 1
+        },
+        {
+          "id": "forecast",
+          "span": 1
+        },
+        {
+          "id": "allocation",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W15",
+      "visualProfile": "digital-twin",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "digital-twin",
+          "span": 2
+        },
+        {
+          "id": "simulation",
+          "span": 1
+        },
+        {
+          "id": "dependencies",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W16",
+      "visualProfile": "agents",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "agents",
+          "span": 2
+        },
+        {
+          "id": "delegation",
+          "span": 1
+        },
+        {
+          "id": "oversight",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W17",
+      "visualProfile": "recovery",
+      "density": "compact",
+      "panels": [
+        {
+          "id": "backups",
+          "span": 1
+        },
+        {
+          "id": "restore",
+          "span": 1
+        },
+        {
+          "id": "recovery",
+          "span": 1
+        }
+      ]
+    },
+    {
+      "workspaceId": "W18",
+      "visualProfile": "catalog",
+      "density": "comfortable",
+      "panels": [
+        {
+          "id": "catalog",
+          "span": 1
+        },
+        {
+          "id": "templates",
+          "span": 1
+        },
+        {
+          "id": "provisioning",
+          "span": 1
+        }
+      ]
+    }
+  ]
+}
