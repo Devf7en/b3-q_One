@@ -1,0 +1,3 @@
+# Command Code and Engineering Cockpit
+
+W09 and W11 share a typed command planning boundary. The initial planner accepts only registered operations, explicit targets and defined parameters. All plans require authorization; changes additionally require approval. No plan can execute in this demonstration. Risk categories are preliminary, not production policy. Future server-side identity, tenant/resource authorization, policy evaluation, immutable approval binding, audit, isolated adapters, cancellation and verification are mandatory before execution. Preserve the approved visual references, terminal sessions, model routing, code understanding, API explorer, container and process inspection. Never interpret arbitrary AI text as shell commands.
