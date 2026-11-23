@@ -1,0 +1,12 @@
+{
+  "name": "b3eq-one",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "demo": "node apps/control-command-center/demo.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
