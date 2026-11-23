@@ -1,0 +1,3 @@
+# W14, W15 and W17 planning
+
+FinOps uses integer USD cents and constant monthly assumptions, excluding taxes, discounts and usage variability. Digital Twin uses homogeneous capacity units; it is not a live topology or failover model. Resilience compares hypothetical backup age and restore duration against RPO and RTO, and requires a simulated verification flag. Client assertions are never production evidence. All outputs are simulations. Future work requires provider billing evidence, resource-specific capacity, timestamped backup manifests, checksum and restore-test evidence, server-side policy and authorization. Preserve all approved visual references and workspace primitives.
