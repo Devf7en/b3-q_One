@@ -1,0 +1,2 @@
+export function integrationStatus(registry,id){const matches=registry.integrations.filter(x=>x.id===id);if(matches.length!==1)throw Error('Unknown or ambiguous integration');return {id,authority:matches[0].authority,capability:matches[0].capability,state:'unavailable',connected:false,executable:false};}
+export function surfaceAllows(surface,operation){if(!['control','observatory'].includes(surface)||!['read','mutate'].includes(operation))return false;return operation==='read';}
