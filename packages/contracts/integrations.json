@@ -1,0 +1,62 @@
+{
+  "version": "0.1.0",
+  "projectId": "b3eq-one",
+  "integrations": [
+    {
+      "id": "ebma",
+      "authority": "architecture",
+      "capability": "architecture-conformance",
+      "state": "unavailable",
+      "connected": false
+    },
+    {
+      "id": "ai-native-standards",
+      "authority": "normative-ai-semantics",
+      "capability": "primitive-adoption",
+      "state": "unavailable",
+      "connected": false
+    },
+    {
+      "id": "intelligence",
+      "authority": "entity-intelligence",
+      "capability": "entity-research",
+      "state": "unavailable",
+      "connected": false
+    },
+    {
+      "id": "observability",
+      "authority": "operational-evidence",
+      "capability": "telemetry-query",
+      "state": "unavailable",
+      "connected": false
+    },
+    {
+      "id": "udf",
+      "authority": "experience-semantics",
+      "capability": "visual-conformance",
+      "state": "unavailable",
+      "connected": false
+    },
+    {
+      "id": "core",
+      "authority": "enterprise-runtime",
+      "capability": "business-service",
+      "state": "unavailable",
+      "connected": false
+    },
+    {
+      "id": "academia",
+      "authority": "education-domain",
+      "capability": "education-service",
+      "state": "unavailable",
+      "connected": false
+    },
+    {
+      "id": "n8n",
+      "authority": "workflow-coordination",
+      "capability": "workflow-dispatch",
+      "state": "unavailable",
+      "connected": false
+    }
+  ]
+}
