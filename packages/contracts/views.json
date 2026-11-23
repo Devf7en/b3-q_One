@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "defaultView": "mission-control",
+  "themes": [
+    "light",
+    "dark",
+    "system"
+  ],
+  "views": [
+    {
+      "id": "mission-control",
+      "name": "Mission Control"
+    },
+    {
+      "id": "business-workspace",
+      "name": "Business Workspace"
+    },
+    {
+      "id": "intelligence-workspace",
+      "name": "Intelligence Workspace"
+    },
+    {
+      "id": "developer-studio",
+      "name": "Developer Studio"
+    },
+    {
+      "id": "spatial-infrastructure",
+      "name": "Spatial Infrastructure"
+    },
+    {
+      "id": "executive-overview",
+      "name": "Executive Overview"
+    },
+    {
+      "id": "custom-canvas",
+      "name": "Custom Canvas"
+    }
+  ],
+  "sharedContext": [
+    "tenant",
+    "project",
+    "resource"
+  ],
+  "permissionModel": "server-authoritative",
+  "layoutScope": "tenant-user"
+}
