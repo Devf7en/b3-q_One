@@ -36,6 +36,9 @@ const operations={
  business:['Review subscription policy','Propose seat allocation'],
  marketplace:['Review catalog configuration','Propose listing revision']
 };
+const relationships=[
+ ['command','security','governed-by'],['infrastructure','finops','budgeted-by'],['provisioning','infrastructure','allocates'],['hosting','infrastructure','depends-on'],['domains','hosting','routes-to'],['containers','infrastructure','runs-on'],['developer','containers','targets'],['data','infrastructure','runs-on'],['automation','provisioning','orchestrates'],['intelligence','automation','proposes-to'],['security','observability','monitored-by'],['observability','infrastructure','observes'],['resilience','data','protects'],['finops','business','allocated-to'],['business','marketplace','consumes'],['marketplace','hosting','offers']
+];
 export function createInspector(host,{isReadOnly,onPlan}){
  const el=(tag,text='')=>{const n=document.createElement(tag);n.textContent=text;return n;};
  let environmentId='command';let selected=0,tab='Properties',items=fixtures,draft={...fixtures[0]};
@@ -52,9 +55,14 @@ export function createInspector(host,{isReadOnly,onPlan}){
  }else if(tab==='Details'){host.append(el('pre',JSON.stringify(original,null,2)));}
  else if(tab==='Tools'){const inspect=el('button',operations[environmentId]?.[0]??'Inspect configuration');inspect.type='button';inspect.onclick=()=>{output.textContent=JSON.stringify(original);};host.append(inspect);}
  else if(tab==='Actions'){host.append(el('p','Planning only — no execution or provider connection.'));const operation=operations[environmentId]?.[1];if(operation&&!readOnly){const propose=el('button',operation);propose.type='button';propose.onclick=()=>{onPlan({environment:environmentId,operation,resourceId:original.id,before:{...original},after:{...original},executable:false,requiresReview:true});output.textContent='Non-executable proposal recorded.';};host.append(propose);}else host.append(el('p','Read-only surface.')); }
+ else if(tab==='Relationships'){
+ host.append(el('p','Illustrative dependency model — not discovered infrastructure.'));
+ if(original.id!==specialized[environmentId]?.id){host.append(el('p','No modeled relationships for this fixture.'));}
+ else for(const [from,to,type] of relationships.filter(([a,b])=>a===environmentId||b===environmentId)){const row=el('p',specialized[from].name+' — '+type+' → '+specialized[to].name);host.append(row);}
+ }
  else if(tab==='Security'){host.append(el('p','Authentication unavailable. Execution disabled. Independent approval required.'));}
  else host.append(el('p',tab+' — authoritative integration unavailable.'));
  host.append(output);
  }
- render();return {setEnvironment(id){environmentId=id;const spec=specialized[id];items=spec?[{...spec,...Object.fromEntries(spec.fields.map(([key,,,,value])=>[key,value]))},...fixtures]:fixtures;selected=0;draft={...items[0]};render();},refresh(){if(isReadOnly())draft={...items[selected]};render();}};
+ const initial=specialized[environmentId];if(initial){items=[{...initial,...Object.fromEntries(initial.fields.map(([key,,,,value])=>[key,value]))},...fixtures];draft={...items[0]};}render();return {setEnvironment(id){environmentId=id;const spec=specialized[id];items=spec?[{...spec,...Object.fromEntries(spec.fields.map(([key,,,,value])=>[key,value]))},...fixtures]:fixtures;selected=0;draft={...items[0]};render();},refresh(){if(isReadOnly())draft={...items[selected]};render();}};
 }
