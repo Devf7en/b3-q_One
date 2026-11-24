@@ -144,7 +144,27 @@ try{
  await page.getByRole('button',{name:'Dock Console & Activity',exact:true}).click();
  await page.locator('#dock-toggle').click();
  await page.setViewportSize({width:390,height:844});
+ assert.equal(await page.locator('#workspace').isVisible(),false);
+ assert.equal(await page.locator('#account-toggle').isVisible(),true);
+ assert.equal(await page.locator('.topbar-brand').isVisible(),true);
+ assert.equal(await page.locator('#topbar-overflow').isVisible(),true);
+ const headerMetrics=await page.locator('header').evaluate(e=>({height:e.getBoundingClientRect().height,scrollWidth:e.scrollWidth,clientWidth:e.clientWidth}));
+ assert.ok(headerMetrics.height<=65,'Mobile header must remain a single row');
+ assert.ok(headerMetrics.scrollWidth<=headerMetrics.clientWidth+1,'Mobile header must not overflow horizontally');
+ await page.locator('#topbar-overflow summary').click();
  assert.equal(await page.locator('#workspace').isVisible(),true);
+ assert.equal(await page.locator('#environment').isVisible(),true);
+ assert.equal(await page.locator('#theme').isVisible(),true);
+ assert.equal(await page.locator('#dock-toggle').isVisible(),true);
+ await page.locator('#workspace').selectOption('W08');
+ await page.locator('#theme').selectOption('dark');
+ await page.keyboard.press('Escape');
+ assert.equal(await page.locator('#topbar-overflow').evaluate(e=>e.open),false);
+ await page.setViewportSize({width:768,height:900});
+ assert.ok((await page.locator('header').evaluate(e=>e.getBoundingClientRect().height))<=70);
+ await page.setViewportSize({width:1440,height:900});
+ assert.equal(await page.locator('#workspace').isVisible(),true);
+ assert.equal(await page.locator('#account-toggle').isVisible(),true);
  assert.deepEqual(errors,[]);
  console.log('Browser acceptance passed');
 }finally{if(browser)await browser.close();await new Promise(resolve=>http.close(resolve));}
