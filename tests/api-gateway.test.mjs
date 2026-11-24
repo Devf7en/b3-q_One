@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {createGateway} from '../packages/api-gateway/index.mjs';
+const tenantId='00000000-0000-0000-0000-000000000001',projectId='00000000-0000-0000-0000-000000000002';
+function fixture(role='operator'){let calls=0;const principal={tenantId,userId:projectId,role};return {count:()=>calls,run:createGateway({authenticate:async t=>{if(t!=='fixture')throw Error('bad');return principal;},transaction:async(c,fn)=>fn({query:async()=>({rows:[]})},principal),governance:{create:async()=>{calls++;return {};},approve:async()=>{calls++;return {};}}})};}
+const req={method:'POST',path:'/v1/control/plans',token:'fixture',tenantId,body:{projectId,manifest:{kind:'demo'}}};
+test('reject unauthenticated, observer mutation and injected role',async()=>{const {run,count}=fixture();for(const [patch,status] of [[{token:''},401],[{path:'/v1/observatory/plans'},403],[{body:{...req.body,role:'approver'}},400]])assert.equal((await run({...req,...patch})).status,status);assert.equal(count(),0);});
+test('authorized plan is not executable',async()=>{const {run,count}=fixture();const res=await run(req);assert.equal(res.status,201);assert.equal(res.body.executable,false);assert.equal(count(),1);});
+test('viewer reads but cannot mutate',async()=>{const {run}=fixture('viewer');assert.equal((await run(req)).status,403);assert.equal((await run({...req,method:'GET',path:'/v1/observatory/projects'})).status,200);});
