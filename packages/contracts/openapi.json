@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "b3Ɛq::One API",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Development contract; no deployed endpoint. Tenant header is not proof of membership. POST requires verified role and independent approval where applicable."
   },
   "security": [
@@ -554,11 +554,19 @@
                     },
                     "truncated": {
                       "type": "boolean"
+                    },
+                    "nextCursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
                     }
                   },
                   "required": [
                     "records",
-                    "truncated"
+                    "truncated",
+                    "nextCursor"
                   ],
                   "additionalProperties": false
                 }
@@ -589,6 +597,24 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/tenant"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 100
+          }
+        },
+        {
+          "name": "after",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          }
         }
       ]
     },
@@ -673,11 +699,19 @@
                     },
                     "truncated": {
                       "type": "boolean"
+                    },
+                    "nextCursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
                     }
                   },
                   "required": [
                     "records",
-                    "truncated"
+                    "truncated",
+                    "nextCursor"
                   ],
                   "additionalProperties": false
                 }
@@ -708,6 +742,24 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/tenant"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 100
+          }
+        },
+        {
+          "name": "after",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          }
         }
       ]
     }
