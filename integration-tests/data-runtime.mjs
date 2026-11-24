@@ -17,8 +17,9 @@ try{
  assert.equal((await pool.query('SELECT * FROM one_runtime.projects')).rowCount,0);
  await transaction(context,async c=>{
   assert.equal((await c.query('SELECT * FROM one_runtime.projects')).rowCount,1);
-  assert.equal((await c.query("UPDATE one_runtime.memberships SET role='approver'")).rowCount,0);
+
  });
+ await assert.rejects(transaction(context,c=>c.query("UPDATE one_runtime.memberships SET role='approver'")),/permission denied/);
  await assert.rejects(transaction(context,c=>c.query('DELETE FROM one_runtime.projects')),/permission denied/);
  await assert.rejects(transaction({...context,tenantId:other},async()=>{}),/Unauthorized/);
  assert.equal((await pool.query('SELECT * FROM one_runtime.projects')).rowCount,0);
