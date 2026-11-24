@@ -1,0 +1,3 @@
+# One::API HTTP transport
+
+A dependency-injected Node HTTP server factory exposes the gateway without modifying the demonstration server. Bearer token and explicit tenant header are forwarded to trusted authentication; the header is not proof of membership. JSON POST bodies are bounded (64 KiB default), malformed requests rejected, request/header/socket timeouts configured, responses non-cacheable. No CORS permission or cookie authentication is enabled. Bind only to loopback for development; production requires TLS termination, rate limiting, verified OIDC, safe logging, connection limits and end-to-end database acceptance. No production entrypoint or credentials are supplied. No provider execution route.
