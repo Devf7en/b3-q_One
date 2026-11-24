@@ -46,3 +46,27 @@ header .topbar-brand{flex:none;font-size:clamp(1rem,1.8vw,1.4rem);white-space:no
 
 /* Mobile overflow: anchor the popover inside the visual viewport with safe gutters. */
 @media(max-width:899px){#topbar-overflow-content{position:fixed;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));top:calc(58px + env(safe-area-inset-top,0px));width:auto;max-width:none;min-width:0;box-sizing:border-box;max-height:calc(100dvh - 76px - env(safe-area-inset-bottom,0px));padding:14px;overflow-x:hidden;overscroll-behavior:contain}#topbar-overflow-content>label,#topbar-overflow-content>button,#topbar-overflow-content>span{min-width:0;max-width:100%;box-sizing:border-box}#topbar-overflow-content select{width:100%;min-width:0;box-sizing:border-box}}
+
+/* b3Ɛq::One UI typography contract — shared between app and Pages preview.
+   System-native, no remote font dependency; consistent hierarchy and control sizes. */
+:root{
+ --one-font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+ --one-type-xs:.75rem;
+ --one-type-sm:.875rem;
+ --one-type-base:1rem;
+ --one-type-title:1.25rem;
+ --one-leading:1.45;
+}
+html{font-family:var(--one-font);font-size:16px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-family:var(--one-font);font-size:var(--one-type-base);line-height:var(--one-leading)}
+button,select,input,textarea,summary{font-family:inherit;letter-spacing:normal}
+.topbar-brand{font-family:var(--one-font);font-size:var(--one-type-title)!important;font-weight:700;line-height:1.2;letter-spacing:-.035em}
+.topbar-actions,#topbar-overflow-content{font-family:var(--one-font);font-size:var(--one-type-sm);line-height:1.4}
+.topbar-actions>label,#topbar-overflow-content>label{font-size:var(--one-type-sm);font-weight:500}
+.topbar-actions button,.topbar-actions select,#topbar-overflow-content button,#topbar-overflow-content select{font-size:var(--one-type-sm);font-weight:400;line-height:1.4}
+#topbar-overflow-content{font-size:var(--one-type-sm)}
+#topbar-overflow-content>label{font-size:var(--one-type-sm)}
+#topbar-overflow-content>button,#topbar-overflow-content select{min-height:42px}
+#topbar-overflow summary{font-size:var(--one-type-sm)}
+#topbar-overflow summary span{line-height:1}
+@media(max-width:899px){#topbar-overflow summary{font-size:0}#topbar-overflow summary span{font-size:22px}}
