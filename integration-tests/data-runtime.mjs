@@ -4,7 +4,9 @@ import {createGovernanceService} from '../packages/transactional-governance/inde
 import {verifyChain} from '../packages/audit-evidence/index.mjs';
 import {createDataRuntime} from '../packages/data-runtime/index.mjs';
 import {createMembershipLookup} from '../packages/identity-data/index.mjs';
+import {createEvidenceIngestion} from '../packages/evidence-ingestion/index.mjs';
 const admin=new pg.Pool();
+const ingestPool=new pg.Pool({user:'one_ci_ingest',password:'disposable-ingest-ci-only',max:1});
 const identityPool=new pg.Pool({user:'one_ci_identity',password:'disposable-identity-ci-only',max:1});
 const pool=new pg.Pool({user:'one_ci_login',password:'disposable-runtime-ci-only',max:1});
 const t='00000000-0000-0000-0000-000000000001',other='00000000-0000-0000-0000-000000000002',u='00000000-0000-0000-0000-000000000003',p='00000000-0000-0000-0000-000000000004';
@@ -33,6 +35,21 @@ try{
  await assert.rejects(admin.query("INSERT INTO one_runtime.infrastructure_assignments VALUES ($1,'containers','wrong-project',$2,$3,$4)",[host,other,host,resource]),e=>e.code==='23503');
  await assert.rejects(pool.query('SELECT * FROM one_runtime.infrastructure_assignments'),/permission denied/);
  await assert.rejects(pool.query('SELECT * FROM one_runtime.infrastructure_collectors'),/permission denied/);
+ await admin.query("CREATE ROLE one_ci_ingest LOGIN PASSWORD 'disposable-ingest-ci-only' IN ROLE one_ingest");
+ const now='2026-01-01T00:00:00.000Z';
+ const ingest=createEvidenceIngestion({pool:ingestPool,issuer:'fixture',audience:'collector',clock:()=>now,verifyToken:async token=>{if(token!=='fixture')throw Error('Unauthorized');return {iss:'fixture',sub:'collector'};}});
+ const submission={token:'fixture',tenantId:t,projectId:p,submissionId:'00000000-0000-0000-0000-000000000014',snapshot:{providerId:'local-docker',source:'docker-cli:containers',state:'live',observed_at:now,executable:false,records:[{ID:'fixture-ref',Names:'owned'},{ID:'unassigned',Names:'private'}]}};
+ await assert.rejects(ingest(submission),/not authorized/);
+ await admin.query('UPDATE one_runtime.infrastructure_hosts SET enabled=true WHERE id=$1',[host]);
+ await admin.query('UPDATE one_runtime.infrastructure_collectors SET enabled=true WHERE id=$1',[collector]);
+ await assert.rejects(ingest({...submission,token:'invalid'}),/Unauthorized/);
+ await assert.rejects(ingest({...submission,tenantId:other}),/not authorized/);
+ const stored=await ingest(submission);assert.equal(stored.recordCount,1);assert.equal(stored.executable,false);
+ await assert.rejects(ingest(submission),e=>e.code==='23505');
+ const saved=(await admin.query('SELECT payload FROM one_runtime.evidence WHERE id=$1',[stored.id])).rows[0].payload;
+ assert.equal(saved.records.length,1);assert.equal(saved.records[0].resourceId,resource);
+ await assert.rejects(ingestPool.query('SELECT * FROM one_runtime.evidence'),/permission denied/);
+ await assert.rejects(ingestPool.query('UPDATE one_runtime.evidence SET state=\'cached\''),/permission denied/);
  const transaction=createDataRuntime({pool,authenticate:async(token,tenantId)=>{if(token!=='fixture'||tenantId!==t)throw Error('Unauthorized');return {tenantId,userId:u,role:'operator'};}});
  const context={token:'fixture',tenantId:t};
  assert.equal((await pool.query('SELECT * FROM one_runtime.projects')).rowCount,0);
@@ -69,4 +86,4 @@ try{
  assert.equal(verifyChain(events,t,events.at(-1).digest),true);
  assert.equal((await admin.query('SELECT * FROM one_runtime.approvals')).rowCount,1);
  console.log('Restricted PostgreSQL driver and transactional governance acceptance passed');
-}finally{await identityPool.end();await pool.end();await admin.end();}
+}finally{await ingestPool.end();await identityPool.end();await pool.end();await admin.end();}
