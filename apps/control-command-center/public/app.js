@@ -16,7 +16,7 @@ function impactPanel(){const section=node('section','');section.append(node('p',
 let workspace=w.workspaces[0],environment=e.environments[0],observatory=false;
 function node(tag,text){const n=document.createElement(tag);n.textContent=text;return n;}
 for(const item of w.workspaces){const o=node('option',item.id+' — '+item.name);o.value=item.id;$('workspace').append(o);}
-for(const item of e.environments){const b=node('button',item.name);b.onclick=()=>{environment=item;$('environment').value=item.id;render();closeTemporaryAccount();};$('environments').append(b);}
+for(const item of e.environments){const b=node('button',item.name);b.onclick=()=>{environment=item;$('environment').value=item.id;inspector.setEnvironment(item.id);render();closeTemporaryAccount();};$('environments').append(b);}
 const toolbar=node('div','');toolbar.className='layout-toolbar';$('panels').before(toolbar);
 function button(label,fn,disabled=false){const b=node('button',label);b.type='button';b.onclick=fn;b.disabled=disabled;return b;}
 function storageKey(){return key(workspace.id,observatory?'observatory':'control');}
@@ -39,7 +39,7 @@ render();
 
 // Global shell: independent of workspace render and panel persistence.
 for(const item of e.environments){const o=node('option',item.name);o.value=item.id;$('environment').append(o);}
-$('environment').onchange=()=>{environment=e.environments.find(x=>x.id===$('environment').value);render();closeTemporaryAccount();};
+$('environment').onchange=()=>{environment=e.environments.find(x=>x.id===$('environment').value);inspector.setEnvironment(environment.id);render();closeTemporaryAccount();};
 let pinned=true;
 function showOverlay(id,trigger,visible){$(id).hidden=!visible;$(trigger).setAttribute('aria-expanded',String(visible));}
 function closeTemporaryAccount(){if(!pinned)showOverlay('account-menu','account-toggle',false);}
