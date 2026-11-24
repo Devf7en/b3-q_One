@@ -1,0 +1,3 @@
+# PostgreSQL runtime foundation
+
+Migration 001 is a fresh-database schema candidate, not applied to any production database. Nine tables, composite tenant foreign keys, plan-version/digest approval binding and forced row-level security on seven tenant-scoped tables. No application grants are created. The future trusted backend must set one.tenant_id transaction-locally only after verified membership; never expose SQL or arbitrary session settings to clients. RLS is not authentication and superusers/BYPASSRLS bypass it. Global identity and tenant tables require separate restricted access. Digest computation, immutable records, role enforcement, audit append-only grants and real PostgreSQL acceptance remain pending. Do not run against existing databases without review.
