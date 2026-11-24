@@ -29,6 +29,10 @@ try{
  }
  assert.equal((await request('observatory/evidence',op,other)).status,401);
  assert.equal((await request('observatory/evidence',op,t,{})).status,405);
+ const first=await (await request('observatory/evidence?limit=1')).json();assert.equal(first.records.length,1);assert.equal(first.truncated,true);assert.equal(first.nextCursor,id(10));
+ const second=await (await request('observatory/evidence?limit=1&after='+first.nextCursor)).json();assert.equal(second.records[0].id,id(11));assert.equal(second.nextCursor,null);
+ assert.equal((await request('observatory/evidence?after='+id(12))).status,400);
+ assert.equal((await request('observatory/evidence?limit=101')).status,400);
  const input={projectId:project,manifest:{kind:'simulation'}};
  assert.equal((await request('observatory/plans',op,t,input)).status,403);
  const created=await request('control/plans',op,t,input);assert.equal(created.status,201);
