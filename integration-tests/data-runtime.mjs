@@ -22,6 +22,17 @@ try{
  await assert.rejects(identityPool.query('SELECT * FROM one_runtime.identities'),/permission denied/);
  await assert.rejects(identityPool.query('SELECT * FROM one_runtime.memberships'),/permission denied/);
  await assert.rejects(pool.query('SELECT * FROM one_runtime.resolve_membership($1,$2,$3)',['fixture','operator',t]),/permission denied/);
+ const host='00000000-0000-0000-0000-000000000011',collector='00000000-0000-0000-0000-000000000012',resource='00000000-0000-0000-0000-000000000013';
+ await admin.query("INSERT INTO one_runtime.infrastructure_hosts(id,provider_id,name) VALUES ($1,'local-docker','fixture')",[host]);
+ await admin.query("INSERT INTO one_runtime.infrastructure_collectors(id,host_id,issuer,subject) VALUES ($1,$2,'fixture','collector')",[collector,host]);
+ assert.equal((await admin.query('SELECT enabled FROM one_runtime.infrastructure_hosts WHERE id=$1',[host])).rows[0].enabled,false);
+ assert.equal((await admin.query('SELECT enabled FROM one_runtime.infrastructure_collectors WHERE id=$1',[collector])).rows[0].enabled,false);
+ await admin.query("INSERT INTO one_runtime.resources VALUES ($1,$3,$4,'container'),($2,$3,$4,'container')",[t,other,resource,p]);
+ await admin.query("INSERT INTO one_runtime.infrastructure_assignments VALUES ($1,'containers','fixture-ref',$2,$3,$4)",[host,t,p,resource]);
+ await assert.rejects(admin.query("INSERT INTO one_runtime.infrastructure_assignments VALUES ($1,'containers','fixture-ref',$2,$3,$4)",[host,other,p,resource]),e=>e.code==='23505');
+ await assert.rejects(admin.query("INSERT INTO one_runtime.infrastructure_assignments VALUES ($1,'containers','wrong-project',$2,$3,$4)",[host,other,host,resource]),e=>e.code==='23503');
+ await assert.rejects(pool.query('SELECT * FROM one_runtime.infrastructure_assignments'),/permission denied/);
+ await assert.rejects(pool.query('SELECT * FROM one_runtime.infrastructure_collectors'),/permission denied/);
  const transaction=createDataRuntime({pool,authenticate:async(token,tenantId)=>{if(token!=='fixture'||tenantId!==t)throw Error('Unauthorized');return {tenantId,userId:u,role:'operator'};}});
  const context={token:'fixture',tenantId:t};
  assert.equal((await pool.query('SELECT * FROM one_runtime.projects')).rowCount,0);
