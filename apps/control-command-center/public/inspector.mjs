@@ -39,6 +39,14 @@ const operations={
 const relationships=[
  ['command','security','governed-by'],['infrastructure','finops','budgeted-by'],['provisioning','infrastructure','allocates'],['hosting','infrastructure','depends-on'],['domains','hosting','routes-to'],['containers','infrastructure','runs-on'],['developer','containers','targets'],['data','infrastructure','runs-on'],['automation','provisioning','orchestrates'],['intelligence','automation','proposes-to'],['security','observability','monitored-by'],['observability','infrastructure','observes'],['resilience','data','protects'],['finops','business','allocated-to'],['business','marketplace','consumes'],['marketplace','hosting','offers']
 ];
+// Only explicit operational dependencies propagate a modeled outage.
+export function modeledImpact(root,edges=relationships){
+ if(!Object.hasOwn(specialized,root))throw new Error('Unknown environment');
+ const propagating=new Set(['depends-on','runs-on','routes-to']);
+ const seen=new Set([root]),queue=[[root]],affected=[];
+ for(let i=0;i<queue.length;i++){const path=queue[i],current=path[path.length-1];for(const [from,to,type] of edges){if(to!==current||!propagating.has(type)||seen.has(from)||!Object.hasOwn(specialized,from))continue;seen.add(from);const next=[...path,from];queue.push(next);affected.push({environment:from,path:next});}}
+ return {root,affected,state:'demonstration',executable:false};
+}
 export function createInspector(host,{isReadOnly,onPlan}){
  const el=(tag,text='')=>{const n=document.createElement(tag);n.textContent=text;return n;};
  let environmentId='command';let selected=0,tab='Properties',items=fixtures,draft={...fixtures[0]};
@@ -59,6 +67,11 @@ export function createInspector(host,{isReadOnly,onPlan}){
  host.append(el('p','Illustrative dependency model — not discovered infrastructure.'));
  if(original.id!==specialized[environmentId]?.id){host.append(el('p','No modeled relationships for this fixture.'));}
  else for(const [from,to,type] of relationships.filter(([a,b])=>a===environmentId||b===environmentId)){const row=el('p',specialized[from].name+' — '+type+' → '+specialized[to].name);host.append(row);}
+ }
+ else if(tab==='Intelligence'){
+ host.append(el('p','Modeled outage impact — synthetic dependencies only. Governance, monitoring and financial edges do not propagate outages.'));
+ if(original.id===specialized[environmentId]?.id){const result=modeledImpact(environmentId);host.append(el('h3',result.affected.length+' modeled downstream environments'));for(const item of result.affected)host.append(el('p',item.path.map(id=>specialized[id].name).join(' → ')));if(!result.affected.length)host.append(el('p','No downstream impact in this limited model. This does not establish operational safety.'));}
+ else host.append(el('p','No modeled dependency evidence for this fixture.'));
  }
  else if(tab==='Security'){host.append(el('p','Authentication unavailable. Execution disabled. Independent approval required.'));}
  else host.append(el('p',tab+' — authoritative integration unavailable.'));
