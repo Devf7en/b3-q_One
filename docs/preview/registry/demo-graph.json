@@ -1,0 +1,59 @@
+{
+  "source": "synthetic fixture",
+  "observed_at": null,
+  "state": "demonstration",
+  "nodes": [
+    {
+      "id": "prod-db",
+      "type": "database",
+      "owner": "data"
+    },
+    {
+      "id": "api-gateway",
+      "type": "service",
+      "owner": "platform"
+    },
+    {
+      "id": "checkout-svc",
+      "type": "application",
+      "owner": "commerce"
+    },
+    {
+      "id": "customer-portal",
+      "type": "application",
+      "owner": "experience"
+    },
+    {
+      "id": "order-processing",
+      "type": "workflow",
+      "owner": "commerce"
+    },
+    {
+      "id": "storefront",
+      "type": "business",
+      "owner": "commerce"
+    }
+  ],
+  "edges": [
+    {
+      "from": "prod-db",
+      "to": "api-gateway"
+    },
+    {
+      "from": "api-gateway",
+      "to": "checkout-svc"
+    },
+    {
+      "from": "api-gateway",
+      "to": "customer-portal"
+    },
+    {
+      "from": "checkout-svc",
+      "to": "order-processing"
+    },
+    {
+      "from": "checkout-svc",
+      "to": "storefront"
+    }
+  ]
+}
