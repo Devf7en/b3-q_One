@@ -97,3 +97,22 @@ dockSettings.append(node('h3','Portable layout'),transfer,button('Export layout'
 const floatButton=button('Float Inspector',()=>{if(dockPrefs.locked)return;const host=$('object-inspector');const floating=host.classList.toggle('floating-inspector');floatButton.textContent=floating?'Dock Inspector':'Float Inspector';floatButton.setAttribute('aria-pressed',String(floating));});floatButton.setAttribute('aria-pressed','false');dockSettings.append(floatButton);
 const floatGrip=node('button','Move floating Inspector');floatGrip.type='button';floatGrip.className='floating-inspector-grip';$('object-inspector').before(floatGrip);
 floatGrip.onpointerdown=e=>{const host=$('object-inspector');if(dockPrefs.locked||!host.classList.contains('floating-inspector')||e.button!==0)return;e.preventDefault();const rect=host.getBoundingClientRect(),x=e.clientX,y=e.clientY;floatGrip.setPointerCapture(e.pointerId);floatGrip.onpointermove=m=>{const left=Math.max(0,Math.min(innerWidth-rect.width,rect.left+m.clientX-x)),top=Math.max(0,Math.min(innerHeight-80,rect.top+m.clientY-y));host.style.setProperty('--float-x',left+'px');host.style.setProperty('--float-y',top+'px');floatGrip.style.setProperty('--float-x',left+'px');floatGrip.style.setProperty('--float-y',top+'px');};floatGrip.onlostpointercapture=()=>{floatGrip.onpointermove=null;};};
+
+const floatingKey='one:floating-panels:v1';
+let floatingPanels={};
+try{const saved=JSON.parse(localStorage.getItem(floatingKey));for(const [id] of docks){const v=saved?.[id];if(v&&typeof v.active==='boolean'&&Number.isFinite(v.x)&&Number.isFinite(v.y))floatingPanels[id]={active:v.active,x:Math.max(0,v.x),y:Math.max(0,v.y)};}}catch{}
+const floatingControls=node('section','');floatingControls.append(node('h3','Floating panels'));dockSettings.append(floatingControls);
+function persistFloating(){try{localStorage.setItem(floatingKey,JSON.stringify(floatingPanels));}catch{}}
+for(const [id,name] of docks){
+ const host=$(id);const state=floatingPanels[id]??={active:false,x:80,y:140};
+ const grip=id==='object-inspector'?floatGrip:node('button','Move '+name);
+ if(id!=='object-inspector'){grip.type='button';host.before(grip);}
+ grip.classList.add('universal-float-grip');grip.dataset.floatDock=id;
+ const toggle=id==='object-inspector'?floatButton:button('Float '+name,()=>{});
+ if(id!=='object-inspector')floatingControls.append(toggle);
+ function apply(){host.classList.toggle('universal-floating',state.active);if(id==='object-inspector')host.classList.toggle('floating-inspector',state.active);const width=Math.min(id==='environments'?dockPrefs.width:id==='object-inspector'?dockPrefs.inspectorWidth:420,innerWidth-16);state.x=Math.max(0,Math.min(state.x,innerWidth-width));state.y=Math.max(0,Math.min(state.y,innerHeight-100));for(const el of [host,grip]){el.style.setProperty('--float-x',state.x+'px');el.style.setProperty('--float-y',state.y+'px');el.style.setProperty('--float-width',width+'px');}toggle.textContent=(state.active?'Dock ':'Float ')+(id==='object-inspector'?'Inspector':name);toggle.setAttribute('aria-pressed',String(state.active));persistFloating();}
+ toggle.onclick=()=>{if(!dockPrefs.locked){state.active=!state.active;apply();}};
+ grip.onpointerdown=e=>{if(dockPrefs.locked||!state.active||e.button!==0)return;e.preventDefault();grip.setPointerCapture(e.pointerId);const x=e.clientX,y=e.clientY,sx=state.x,sy=state.y;grip.onpointermove=m=>{state.x=sx+m.clientX-x;state.y=sy+m.clientY-y;apply();};grip.onlostpointercapture=()=>{grip.onpointermove=null;};};
+ grip.onkeydown=e=>{if(dockPrefs.locked||!state.active||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();state.x+=e.key==='ArrowLeft'?-10:e.key==='ArrowRight'?10:0;state.y+=e.key==='ArrowUp'?-10:e.key==='ArrowDown'?10:0;apply();};
+ window.addEventListener('resize',apply);apply();
+}
