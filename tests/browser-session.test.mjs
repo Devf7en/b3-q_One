@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createBrowserSessions} from '../packages/browser-session/index.mjs';
+const tenantId='00000000-0000-0000-0000-000000000001';
+test('opaque secure session, expiry, revocation and membership recheck',async()=>{
+ let now=1000,allowed=true;
+ const sessions=createBrowserSessions({clock:()=>now,ttlMs:2000,maxSessions:2,authenticate:async(token,t)=>{if(!allowed||token!=='fixture'||t!==tenantId)throw Error('Denied');return {tenantId:t,userId:'user'};}});
+ const issue=()=>sessions.issue({token:'fixture',tenantId});
+ const a=await issue(),b=await issue();
+ assert.match(a.setCookie,/^__Host-one_session=[a-f0-9]{64}; Path=\/; Secure; HttpOnly; SameSite=Strict; Max-Age=2$/);
+ assert.ok(!a.setCookie.includes('fixture'));assert.notEqual(a.setCookie,b.setCookie);
+ const header=a.setCookie.split(';')[0];
+ assert.deepEqual(await sessions.resolve(header),{token:'fixture',tenantId});
+ assert.equal(await sessions.resolve(header+'; '+header),null);
+ await assert.rejects(issue(),/capacity/);
+ assert.match(sessions.revoke(header).setCookie,/Max-Age=0$/);
+ assert.equal(await sessions.resolve(header),null);
+ allowed=false;assert.equal(await sessions.resolve(b.setCookie.split(';')[0]),null);
+ allowed=true;const c=await issue();now+=2000;assert.equal(await sessions.resolve(c.setCookie.split(';')[0]),null);
+});
