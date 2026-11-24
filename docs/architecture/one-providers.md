@@ -1,0 +1,3 @@
+# One::Providers — 13C.7
+
+Candidate provider registry and pure planning boundary. Candidate capabilities are design targets, not verified provider API support or account entitlements. No credentials, network calls or execution. Provider adapters must discover capabilities from authenticated accounts, verify tenant resource ownership, normalize evidence and costs, and separate inspection from mutation. Future mutation requires authoritative plan digest, independent approval, execution grant, idempotency and reconciliation. Start with local Docker read-only inventory through a restricted server-side adapter; do not mount the Docker socket into the public application. Existing FTPS/SFTP hosting remains a candidate integration, not a connected account.
