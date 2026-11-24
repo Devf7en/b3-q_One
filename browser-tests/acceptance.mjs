@@ -144,6 +144,7 @@ try{
  await page.getByRole('button',{name:'Dock Console & Activity',exact:true}).click();
  await page.locator('#dock-toggle').click();
  await page.setViewportSize({width:390,height:844});
+ await page.waitForFunction(()=>document.querySelector('#workspace')?.closest('#topbar-overflow-content')&&document.querySelector('#topbar-overflow')?.hidden===false);
  assert.equal(await page.locator('#workspace').isVisible(),false);
  assert.equal(await page.locator('#account-toggle').isVisible(),true);
  assert.equal(await page.locator('.topbar-brand').isVisible(),true);
