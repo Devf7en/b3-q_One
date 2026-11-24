@@ -11,7 +11,7 @@ export function createDataRuntime({pool,authenticate}){
  try{
  await client.query('BEGIN');
  await client.query("SELECT set_config('one.tenant_id', $1, true)",[tenantId]);
- const membership=await client.query('SELECT role FROM one_runtime.memberships WHERE tenant_id=$1 AND user_id=$2 FOR SHARE',[tenantId,principal.userId]);
+ const membership=await client.query('SELECT role FROM one_runtime.lock_membership($1,$2)',[tenantId,principal.userId]);
  if(membership.rows.length!==1||membership.rows[0].role!==principal.role)throw Error('Membership changed');
  const result=await work(client,Object.freeze({...principal}));
  await client.query('COMMIT');
