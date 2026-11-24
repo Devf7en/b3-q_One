@@ -80,6 +80,16 @@ try{
  await page.getByRole('button',{name:'Restore all docks',exact:true}).click();
  for(const id of ['environments','object-inspector','activity-console'])assert.equal(await page.locator('#'+id).isVisible(),true);
  await page.locator('#dock-toggle').click();
+ const inspector=page.locator('#object-inspector');
+ await inspector.getByLabel('Inspect resource').selectOption('1');
+ await inspector.getByLabel('Virtual CPUs').fill('6');
+ await inspector.getByRole('button',{name:'Save change plan',exact:true}).click();
+ assert.match(await page.locator('#activity-console').textContent(),/independent review required/);
+ assert.match(await page.locator('#activity-console pre').last().textContent(),/"executable": false/);
+ await page.locator('#toggle').click();
+ assert.equal(await inspector.getByLabel('Virtual CPUs').isDisabled(),true);
+ assert.equal(await inspector.getByRole('button',{name:'Save change plan',exact:true}).count(),0);
+ await page.locator('#toggle').click();
  await page.setViewportSize({width:390,height:844});
  assert.equal(await page.locator('#workspace').isVisible(),true);
  assert.deepEqual(errors,[]);
