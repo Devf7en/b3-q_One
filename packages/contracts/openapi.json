@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "b3Ɛq::One API",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Development contract; no deployed endpoint. Tenant header is not proof of membership. POST requires verified role and independent approval where applicable."
   },
   "security": [
@@ -440,6 +440,244 @@
                   "required": [
                     "record",
                     "executable"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Request rejected or unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/tenant"
+        }
+      ]
+    },
+    "/v1/control/evidence": {
+      "get": {
+        "operationId": "controlListEvidence",
+        "summary": "List latest tenant evidence (maximum 100 observations)",
+        "responses": {
+          "200": {
+            "description": "Tenant-scoped records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "records": {
+                      "type": "array",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                          },
+                          "projectId": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "observedAt": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "format": "date-time"
+                          },
+                          "state": {
+                            "enum": [
+                              "live",
+                              "cached",
+                              "unavailable",
+                              "demonstration"
+                            ]
+                          },
+                          "freshness": {
+                            "enum": [
+                              "fresh",
+                              "stale",
+                              "invalid",
+                              "not-applicable"
+                            ]
+                          },
+                          "verified": {
+                            "const": false
+                          },
+                          "ageMs": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "records": {
+                            "type": "array",
+                            "items": {
+                              "type": "object"
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "projectId",
+                          "source",
+                          "observedAt",
+                          "state",
+                          "freshness",
+                          "verified",
+                          "records"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "truncated": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "records",
+                    "truncated"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Request rejected or unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/tenant"
+        }
+      ]
+    },
+    "/v1/observatory/evidence": {
+      "get": {
+        "operationId": "observatoryListEvidence",
+        "summary": "List latest tenant evidence (maximum 100 observations)",
+        "responses": {
+          "200": {
+            "description": "Tenant-scoped records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "records": {
+                      "type": "array",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                          },
+                          "projectId": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "observedAt": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "format": "date-time"
+                          },
+                          "state": {
+                            "enum": [
+                              "live",
+                              "cached",
+                              "unavailable",
+                              "demonstration"
+                            ]
+                          },
+                          "freshness": {
+                            "enum": [
+                              "fresh",
+                              "stale",
+                              "invalid",
+                              "not-applicable"
+                            ]
+                          },
+                          "verified": {
+                            "const": false
+                          },
+                          "ageMs": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "records": {
+                            "type": "array",
+                            "items": {
+                              "type": "object"
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "projectId",
+                          "source",
+                          "observedAt",
+                          "state",
+                          "freshness",
+                          "verified",
+                          "records"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "truncated": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "records",
+                    "truncated"
                   ],
                   "additionalProperties": false
                 }
