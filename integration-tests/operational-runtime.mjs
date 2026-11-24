@@ -22,6 +22,13 @@ try{
  assert.equal((await request('control/projects','invalid')).status,401);
  assert.equal((await request('control/projects',op,other)).status,401);
  const read=await request('observatory/projects');assert.equal(read.status,200);assert.deepEqual((await read.json()).records,[{id:project,name:'A'}]);
+ const stamp=new Date().toISOString(),old=new Date(Date.now()-600000).toISOString();
+ await admin.query("INSERT INTO one_runtime.evidence(tenant_id,id,project_id,source,observed_at,state,payload) VALUES ($1,$3,$6,'docker-cli:containers',$7,'live','{}'),($1,$4,$6,'docker-cli:containers',$8,'live','{}'),($2,$5,$6,'private-other',$7,'live','{}')",[t,other,id(10),id(11),id(12),project,stamp,old]);
+ for(const surface of ['control','observatory']){
+ const response=await request(surface+'/evidence');assert.equal(response.status,200);const evidence=await response.json();assert.equal(evidence.truncated,false);assert.equal(evidence.records.length,2);assert.equal(evidence.records[0].state,'live');assert.equal(evidence.records[1].state,'cached');assert.ok(evidence.records.every(x=>x.verified===false&&x.source==='docker-cli:containers'));
+ }
+ assert.equal((await request('observatory/evidence',op,other)).status,401);
+ assert.equal((await request('observatory/evidence',op,t,{})).status,405);
  const input={projectId:project,manifest:{kind:'simulation'}};
  assert.equal((await request('observatory/plans',op,t,input)).status,403);
  const created=await request('control/plans',op,t,input);assert.equal(created.status,201);
