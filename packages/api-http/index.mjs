@@ -6,7 +6,7 @@ export function createApiServer({gateway,maxBodyBytes=65536}={}){
  const reject=(status,error)=>{res.setHeader('Connection','close');send(status,{error});req.resume();};
  try{
  if(!['GET','POST'].includes(req.method))return reject(405,'Method not allowed');
- if(!/^\/v1\/[a-z0-9/-]+$/.test(req.url??''))return reject(404,'Not found');
+ if(!/^\/v1\/[a-z0-9/-]+(?:\?[a-z0-9=&-]{1,100})?$/.test(req.url??''))return reject(404,'Not found');
  const auth=/^Bearer ([^\s,]+)$/.exec(req.headers.authorization??'');
  if(!auth)return reject(401,'Authentication required');
  const tenantId=req.headers['x-tenant-id'];
