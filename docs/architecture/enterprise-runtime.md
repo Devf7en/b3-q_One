@@ -1,0 +1,3 @@
+# Enterprise runtime foundation — 13B
+
+Identity must be verified server-side via a future OIDC integration. Tenant membership and roles must come from authoritative storage, never browser claims. The pure policy evaluator is not an authentication service. Default deny; Observatory read-only; operator and approver separated. No execution permission exists. Next: PostgreSQL schema with tenant-scoped foreign keys and row-level security, session verification, immutable plan digest and approval binding, transactional audit outbox, integration tests with real database. Public Pages remains static and separate. No secrets or operational APIs on Pages. Preserve all 18 workspace designs and recover original assets before visual acceptance.
