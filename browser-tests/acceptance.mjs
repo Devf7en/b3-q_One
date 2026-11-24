@@ -152,6 +152,16 @@ try{
  assert.ok(headerMetrics.height<=65,'Mobile header must remain a single row');
  assert.ok(headerMetrics.scrollWidth<=headerMetrics.clientWidth+1,'Mobile header must not overflow horizontally');
  await page.locator('#topbar-overflow summary').click();
+ const typography=await page.evaluate(()=>{
+ const css=(selector)=>getComputedStyle(document.querySelector(selector));
+ return {brand:css('.topbar-brand').fontSize,menu:css('#topbar-overflow-content').fontSize,label:css('#topbar-overflow-content>label').fontSize,control:css('#topbar-overflow-content select').fontSize,font:css('body').fontFamily,buttonHeight:document.querySelector('#dock-toggle').getBoundingClientRect().height};
+ });
+ assert.equal(typography.brand,'20px','Brand typography must follow the 20px design token');
+ assert.equal(typography.menu,'14px','Menu typography must follow the 14px design token');
+ assert.equal(typography.label,'14px','Menu label typography must follow the 14px design token');
+ assert.equal(typography.control,'14px','Menu controls must match label typography');
+ assert.ok(typography.font.includes('system')||typography.font.includes('SF Pro'),'Use system-native font stack');
+ assert.ok(typography.buttonHeight>=42,'Touch menu controls must be at least 42px high');
  const popoverBounds=await page.locator('#topbar-overflow-content').boundingBox();
  assert.ok(popoverBounds.x>=11,'Mobile More menu needs a left safe gutter');
  assert.ok(popoverBounds.x+popoverBounds.width<=390-11,'Mobile More menu needs a right safe gutter');
