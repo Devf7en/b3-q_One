@@ -1,4 +1,4 @@
-# b3Ɛq One
+# b3Ɛq::One
 
 AI-native hosting, provisioning and business operating system.
 
