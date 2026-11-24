@@ -1,0 +1,102 @@
+{
+  "version": "1.0.0",
+  "project": "b3eq-one",
+  "environments": [
+    {
+      "id": "command",
+      "ordinal": 1,
+      "name": "Command",
+      "status": "planned"
+    },
+    {
+      "id": "infrastructure",
+      "ordinal": 2,
+      "name": "Infrastructure",
+      "status": "planned"
+    },
+    {
+      "id": "provisioning",
+      "ordinal": 3,
+      "name": "Provisioning",
+      "status": "planned"
+    },
+    {
+      "id": "hosting",
+      "ordinal": 4,
+      "name": "Hosting",
+      "status": "planned"
+    },
+    {
+      "id": "domains",
+      "ordinal": 5,
+      "name": "Domains",
+      "status": "planned"
+    },
+    {
+      "id": "containers",
+      "ordinal": 6,
+      "name": "Containers",
+      "status": "planned"
+    },
+    {
+      "id": "developer",
+      "ordinal": 7,
+      "name": "Developer",
+      "status": "planned"
+    },
+    {
+      "id": "data",
+      "ordinal": 8,
+      "name": "Data",
+      "status": "planned"
+    },
+    {
+      "id": "automation",
+      "ordinal": 9,
+      "name": "Automation",
+      "status": "planned"
+    },
+    {
+      "id": "intelligence",
+      "ordinal": 10,
+      "name": "Intelligence",
+      "status": "planned"
+    },
+    {
+      "id": "security",
+      "ordinal": 11,
+      "name": "Security",
+      "status": "planned"
+    },
+    {
+      "id": "observability",
+      "ordinal": 12,
+      "name": "Observability",
+      "status": "planned"
+    },
+    {
+      "id": "resilience",
+      "ordinal": 13,
+      "name": "Resilience",
+      "status": "planned"
+    },
+    {
+      "id": "finops",
+      "ordinal": 14,
+      "name": "FinOps",
+      "status": "planned"
+    },
+    {
+      "id": "business",
+      "ordinal": 15,
+      "name": "Business",
+      "status": "planned"
+    },
+    {
+      "id": "marketplace",
+      "ordinal": 16,
+      "name": "Marketplace",
+      "status": "planned"
+    }
+  ]
+}
