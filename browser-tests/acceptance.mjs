@@ -1,0 +1,42 @@
+import {chromium} from 'playwright';
+import assert from 'node:assert/strict';
+import {server} from '../apps/control-command-center/server.mjs';
+import {readFileSync} from 'node:fs';
+const registry=JSON.parse(readFileSync(new URL('../packages/contracts/workspaces.json',import.meta.url)));
+const http=server();await new Promise(resolve=>http.listen(0,'127.0.0.1',resolve));
+let browser;
+try{
+ browser=await chromium.launch({headless:true});
+ const page=await browser.newPage({viewport:{width:1440,height:900}});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:'+http.address().port);
+ await page.waitForFunction(()=>document.querySelectorAll('#workspace option').length===18);
+ assert.equal(await page.title(),'b3Ɛq::One');
+ assert.equal(await page.locator('#environments button').count(),16);
+ await page.locator('#environments button').last().click();
+ const context=await page.locator('#context').textContent();
+ for(const w of registry.workspaces){
+  await page.locator('#workspace').selectOption(w.id);
+  assert.equal(await page.locator('#title').textContent(),w.name);
+  assert.equal(await page.locator('#panels article').count(),w.panels.length);
+  assert.equal(await page.locator('#context').textContent(),context);
+ }
+ await page.locator('#theme').selectOption('dark');
+ assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
+ await page.locator('#workspace').selectOption('W13');
+ await page.getByRole('button',{name:'Validate workflow',exact:true}).click();
+ assert.match(await page.locator('#panels pre').last().textContent(),/executable.*false/);
+ await page.locator('#toggle').click();
+ assert.equal(await page.locator('#command').isVisible(),false);
+ assert.equal(await page.getByRole('button',{name:'Validate workflow',exact:true}).count(),0);
+ assert.match(await page.locator('#panels').textContent(),/Evidence unavailable/);
+ await page.locator('#toggle').click();
+ await page.locator('#intent').fill('Create demo academia stack');
+ await page.getByRole('button',{name:'Preview intent',exact:true}).click();
+ await page.getByRole('button',{name:'Evaluate provisioning simulation',exact:true}).click();
+ await page.waitForFunction(()=>[...document.querySelectorAll('pre')].some(p=>p.textContent.includes('"executable": false')));
+ await page.setViewportSize({width:390,height:844});
+ assert.equal(await page.locator('#workspace').isVisible(),true);
+ assert.deepEqual(errors,[]);
+ console.log('Browser acceptance passed');
+}finally{if(browser)await browser.close();await new Promise(resolve=>http.close(resolve));}
