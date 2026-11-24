@@ -1,0 +1,3 @@
+# Transactional governance — 13C.3
+
+Server-only service composes the trusted transaction boundary, plan and approval policy, parameterized PostgreSQL inserts and audit envelopes. Per-tenant transaction advisory lock serializes cooperating audit writers. Authoritative plan is loaded from storage for approval. Audit failure propagates to transaction rollback. Surface must be determined by trusted server routing, not client input. Fixture tests cover creation and failure propagation, not actual SQL atomicity. Pending: real driver, restricted grants, UUID normalization, approval integration tests, database rollback tests, unique audit sequence constraint, independent head anchoring, idempotency and commit reconciliation. No execution grant or public API.
