@@ -1,6 +1,17 @@
 const tabs=['Properties','Details','Configuration','Tools','Actions','Relationships','Workflows','Intelligence','Security','Observability','History','Documentation'];
 const fixtures=[{id:'srv-001',name:'Application Server',kind:'Compute',cpu:4,ram:8,port:443,backup:true},{id:'db-001',name:'PostgreSQL',kind:'Database',cpu:2,ram:8,port:5432,backup:true},{id:'ctr-001',name:'Container Runtime',kind:'Container',cpu:2,ram:4,port:8080,backup:false}];
 const specialized={
+ command:{id:'cmd-001',name:'Demo command policy',kind:'Command policy',fields:[['timeout','Timeout seconds',1,3600,60],['review','Independent review required',null,null,true]]},
+ infrastructure:{id:'infra-001',name:'Demo compute node',kind:'Compute',fields:[['cpu','Virtual CPUs',1,32,4],['ram','Memory GB',1,64,8],['port','Service port',1,65535,443],['backup','Automated backup',null,null,true]]},
+ provisioning:{id:'prov-001',name:'Demo provisioning plan',kind:'Provisioning',fields:[['instances','Requested instances',1,100,2],['review','Independent review required',null,null,true]]},
+ hosting:{id:'host-001',name:'Demo hosting allocation',kind:'Hosting',fields:[['storage','Storage GB',1,10000,20],['tls','TLS required',null,null,true]]},
+ developer:{id:'dev-001',name:'Demo build pipeline',kind:'Pipeline',fields:[['timeout','Build timeout minutes',1,120,15],['tests','Tests required',null,null,true]]},
+ security:{id:'sec-001',name:'Demo security policy',kind:'Security policy',fields:[['session','Session lifetime minutes',1,60,15],['mfa','MFA required',null,null,true]]},
+ observability:{id:'obs-001',name:'Demo evidence policy',kind:'Evidence policy',fields:[['freshness','Freshness threshold seconds',1,86400,300],['alerts','Alerts enabled',null,null,false]]},
+ resilience:{id:'res-001',name:'Demo recovery policy',kind:'Recovery policy',fields:[['rpo','Recovery point objective minutes',1,10080,1440],['rto','Recovery time objective minutes',1,10080,120],['restoreTest','Restore test required',null,null,true]]},
+ finops:{id:'fin-001',name:'Demo monthly budget',kind:'Budget',fields:[['budget','Monthly budget USD cents',0,100000000,25000],['alert','Budget alerts enabled',null,null,true]]},
+ business:{id:'biz-001',name:'Demo subscription policy',kind:'Subscription',fields:[['seats','Seat allocation',1,10000,10],['renewal','Automatic renewal',null,null,false]]},
+ marketplace:{id:'mkt-001',name:'Demo catalog listing',kind:'Catalog listing',fields:[['price','Unit price USD cents',0,100000000,0],['published','Proposed publication',null,null,false]]},
  domains:{id:'dns-001',name:'example.invalid',kind:'Domain',fields:[['ttl','DNS TTL seconds',60,86400,900],['autoRenew','Automatic renewal',null,null,false]]},
  containers:{id:'ctr-002',name:'Demo container',kind:'Container',fields:[['replicas','Replicas',0,32,2],['port','Service port',1,65535,8080]]},
  data:{id:'db-002',name:'Demo database',kind:'Database',fields:[['connections','Connection limit',1,1000,100],['backup','Automated backup',null,null,true]]},
