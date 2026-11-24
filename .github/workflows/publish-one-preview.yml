@@ -1,0 +1,40 @@
+name: Publish One preview
+on:
+  push:
+    branches: [feat/one-foundation-v1]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/publish-one-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: one-pages-preview
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify preview files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s docs/index.html
+          test -s docs/preview/index.html
+          test -s docs/preview/topbar.mjs
+          test -s docs/preview/style.css
+          test "$(cat docs/CNAME)" = "one.f7en.com"
+          grep -q 'topbar.mjs' docs/preview/index.html
+          grep -q 'topbar-overflow' docs/preview/index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deployment
+        uses: actions/deploy-pages@v4
