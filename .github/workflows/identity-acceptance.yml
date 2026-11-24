@@ -12,3 +12,4 @@ jobs:
           node-version: 22
       - run: npm install --no-save --package-lock=false jose@6.1.0
       - run: node integration-tests/oidc-verifier.mjs
+      - run: node integration-tests/id-token.mjs
