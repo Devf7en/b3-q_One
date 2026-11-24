@@ -116,3 +116,16 @@ for(const [id,name] of docks){
  grip.onkeydown=e=>{if(dockPrefs.locked||!state.active||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();state.x+=e.key==='ArrowLeft'?-10:e.key==='ArrowRight'?10:0;state.y+=e.key==='ArrowUp'?-10:e.key==='ArrowDown'?10:0;apply();};
  window.addEventListener('resize',apply);apply();
 }
+
+let focusedDock=null;
+function focusDock(id){focusedDock=id;for(const [key] of docks){const active=key===id;$(key).classList.toggle('dock-focused',active);document.querySelector('[data-float-dock="'+key+'"]')?.classList.toggle('dock-focused',active);}}
+for(const [id] of docks){$(id).addEventListener('pointerdown',()=>focusDock(id));$(id).addEventListener('focusin',()=>focusDock(id));const grip=document.querySelector('[data-float-dock="'+id+'"]');grip?.addEventListener('pointerdown',()=>focusDock(id));grip?.addEventListener('focus',()=>focusDock(id));}
+const stackKey='one:global-stack:v1';
+let stackEnabled=false,stackActive='object-inspector';
+try{const v=JSON.parse(localStorage.getItem(stackKey));if(v&&typeof v.enabled==='boolean'&&['object-inspector','activity-console'].includes(v.active)){stackEnabled=v.enabled;stackActive=v.active;}}catch{}
+const stackBar=node('div','');stackBar.className='dock-stack-tabs';stackBar.setAttribute('role','group');stackBar.setAttribute('aria-label','Stacked Inspector and Console');
+$('object-inspector').before(stackBar);
+const stackToggle=button('Stack Inspector and Console',()=>{if(dockPrefs.locked)return;stackEnabled=!stackEnabled;applyStack();});dockSettings.append(stackToggle);
+const stackTabs=[['object-inspector','Inspector'],['activity-console','Console']].map(([id,name])=>{const tab=button(name,()=>{stackActive=id;applyStack();});stackBar.append(tab);return [id,tab];});
+function applyStack(){const eligible=stackEnabled&&!floatingPanels['object-inspector']?.active&&!floatingPanels['activity-console']?.active&&dockPrefs.visible[1]&&dockPrefs.visible[2];stackBar.hidden=!eligible;document.documentElement.classList.toggle('dock-stack-active',eligible);for(const [id,tab] of stackTabs){$(id).classList.toggle('dock-stack-inactive',eligible&&id!==stackActive);tab.setAttribute('aria-pressed',String(id===stackActive));}stackToggle.textContent=stackEnabled?'Unstack Inspector and Console':'Stack Inspector and Console';stackToggle.setAttribute('aria-pressed',String(stackEnabled));try{localStorage.setItem(stackKey,JSON.stringify({enabled:stackEnabled,active:stackActive}));}catch{}}
+dockMenu.addEventListener('click',()=>applyStack());dockMenu.addEventListener('change',()=>applyStack());applyStack();
