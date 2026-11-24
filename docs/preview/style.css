@@ -70,3 +70,12 @@ button,select,input,textarea,summary{font-family:inherit;letter-spacing:normal}
 #topbar-overflow summary{font-size:var(--one-type-sm)}
 #topbar-overflow summary span{line-height:1}
 @media(max-width:899px){#topbar-overflow summary{font-size:0}#topbar-overflow summary span{font-size:22px}}
+
+/* Cross-surface component typography: preserve the shared scale in all panels. */
+main h1{font-family:var(--one-font);font-size:clamp(1.375rem,2.2vw,1.75rem);line-height:1.2;letter-spacing:-.025em;font-weight:650}
+main h2,#object-inspector h2,#activity-console h2,article h2{font-family:var(--one-font);font-size:var(--one-type-base);line-height:1.35;font-weight:600;letter-spacing:-.01em}
+main label,main button,main select,main input,main textarea,nav button{font-family:var(--one-font);font-size:var(--one-type-sm);line-height:1.4}
+.notice,#global-status,#context{font-family:var(--one-font);font-size:var(--one-type-sm);line-height:1.45}
+article p,article li,main p{line-height:1.5}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent,#4389db);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}}
