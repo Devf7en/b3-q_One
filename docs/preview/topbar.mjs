@@ -11,7 +11,7 @@ const controls=groups.flat().map(id=>id==='workspace'||id==='theme'||id==='envir
 const ordered=controls.filter(Boolean);
 function arrange(){
  const width=window.innerWidth;
- const compact=width<660,medium=width<1100;
+ const compact=width<960,medium=width<1400;
  for(let i=0;i<ordered.length;i++){
  const move=medium&&(i>=5||compact&&i!==3);
  (move?content:bar).append(ordered[i]);
@@ -21,8 +21,8 @@ function arrange(){
  overflow.hidden=!medium;
  if(!medium)overflow.open=false;
 }
-const media=window.matchMedia('(max-width:1099px)');
-const narrow=window.matchMedia('(max-width:659px)');
+const media=window.matchMedia('(max-width:1399px)');
+const narrow=window.matchMedia('(max-width:959px)');
 media.addEventListener('change',arrange);narrow.addEventListener('change',arrange);
 document.addEventListener('pointerdown',event=>{if(overflow.open&&!overflow.contains(event.target))overflow.open=false;});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&overflow.open){overflow.open=false;overflow.querySelector('summary').focus();}});
