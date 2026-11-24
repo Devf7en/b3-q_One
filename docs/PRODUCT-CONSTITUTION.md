@@ -1,4 +1,4 @@
-# b3Ɛq One Product Constitution v1.0
+# b3Ɛq::One Product Constitution v1.0
 
 ## Principles
 1. AI-first, human-governed, provider-neutral infrastructure.
