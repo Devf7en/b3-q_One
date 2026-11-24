@@ -3,7 +3,9 @@ import pg from 'pg';
 import {createGovernanceService} from '../packages/transactional-governance/index.mjs';
 import {verifyChain} from '../packages/audit-evidence/index.mjs';
 import {createDataRuntime} from '../packages/data-runtime/index.mjs';
+import {createMembershipLookup} from '../packages/identity-data/index.mjs';
 const admin=new pg.Pool();
+const identityPool=new pg.Pool({user:'one_ci_identity',password:'disposable-identity-ci-only',max:1});
 const pool=new pg.Pool({user:'one_ci_login',password:'disposable-runtime-ci-only',max:1});
 const t='00000000-0000-0000-0000-000000000001',other='00000000-0000-0000-0000-000000000002',u='00000000-0000-0000-0000-000000000003',p='00000000-0000-0000-0000-000000000004';
 try{
@@ -12,6 +14,14 @@ try{
  await admin.query("INSERT INTO one_runtime.identities VALUES ($1,'fixture','operator')",[u]);
  await admin.query("INSERT INTO one_runtime.memberships VALUES ($1,$2,'operator')",[t,u]);
  await admin.query("INSERT INTO one_runtime.projects VALUES ($1,$3,'A'),($2,$3,'B')",[t,other,p]);
+ await admin.query("CREATE ROLE one_ci_identity LOGIN PASSWORD 'disposable-identity-ci-only' IN ROLE one_identity");
+ const lookup=createMembershipLookup({pool:identityPool});
+ assert.deepEqual(await lookup({issuer:'fixture',subject:'operator',tenantId:t}),{userId:u,tenantId:t,role:'operator'});
+ assert.equal(await lookup({issuer:'fixture',subject:'operator',tenantId:other}),null);
+ assert.equal(await lookup({issuer:'wrong',subject:'operator',tenantId:t}),null);
+ await assert.rejects(identityPool.query('SELECT * FROM one_runtime.identities'),/permission denied/);
+ await assert.rejects(identityPool.query('SELECT * FROM one_runtime.memberships'),/permission denied/);
+ await assert.rejects(pool.query('SELECT * FROM one_runtime.resolve_membership($1,$2,$3)',['fixture','operator',t]),/permission denied/);
  const transaction=createDataRuntime({pool,authenticate:async(token,tenantId)=>{if(token!=='fixture'||tenantId!==t)throw Error('Unauthorized');return {tenantId,userId:u,role:'operator'};}});
  const context={token:'fixture',tenantId:t};
  assert.equal((await pool.query('SELECT * FROM one_runtime.projects')).rowCount,0);
@@ -48,4 +58,4 @@ try{
  assert.equal(verifyChain(events,t,events.at(-1).digest),true);
  assert.equal((await admin.query('SELECT * FROM one_runtime.approvals')).rowCount,1);
  console.log('Restricted PostgreSQL driver and transactional governance acceptance passed');
-}finally{await pool.end();await admin.end();}
+}finally{await identityPool.end();await pool.end();await admin.end();}
