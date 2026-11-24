@@ -17,9 +17,9 @@ export function createBrowserSessions({authenticate,clock=Date.now,ttlMs=300000,
  const id=randomBytes(32).toString('hex');sessions.set(digest(id),{token,tenantId,userId:principal.userId,expiresAt:now+ttlMs});
  return {setCookie:cookie(id,Math.floor(ttlMs/1000)),expiresAt:now+ttlMs};
  },
- async resolve(header){
+ async resolve(header,{includeProfile=false}={}){
  const k=key(header),now=clock();sweep(now);const s=sessions.get(k);if(!s)return null;
- try{const p=await authenticate(s.token,s.tenantId);if(!p||p.tenantId!==s.tenantId||p.userId!==s.userId||sessions.get(k)!==s||clock()>=s.expiresAt)throw Error('Unauthorized');return {token:s.token,tenantId:s.tenantId};}catch{sessions.delete(k);return null;}
+ try{const p=await authenticate(s.token,s.tenantId);if(!p||p.tenantId!==s.tenantId||p.userId!==s.userId||sessions.get(k)!==s||clock()>=s.expiresAt)throw Error('Unauthorized');return {token:s.token,tenantId:s.tenantId,...(includeProfile?{profile:{userId:p.userId,tenantId:p.tenantId,role:p.role,expiresAt:s.expiresAt}}:{})};}catch{sessions.delete(k);return null;}
  },
  revoke(header){const k=key(header);if(k)sessions.delete(k);return {setCookie:cookie('',0)};}
  });
