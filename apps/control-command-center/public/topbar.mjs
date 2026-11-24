@@ -21,6 +21,20 @@ function arrange(){
  overflow.hidden=!medium;
  if(!medium)overflow.open=false;
 }
+// Position the open menu against the actual visible viewport, not the header button.
+function positionMenu(){
+ if(!overflow.open||window.innerWidth>=900)return;
+ const viewport=window.visualViewport;
+ const left=(viewport?.offsetLeft||0)+12;
+ const width=Math.max(180,(viewport?.width||window.innerWidth)-24);
+ const top=Math.max(0,document.querySelector('header').getBoundingClientRect().bottom+6);
+ const styles={position:'fixed',left:left+'px',right:'auto',width:width+'px',maxWidth:width+'px',boxSizing:'border-box',top:top+'px'};
+ for(const [key,value] of Object.entries(styles))content.style.setProperty(key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),value,'important');
+}
+overflow.addEventListener('toggle',positionMenu);
+window.addEventListener('resize',positionMenu);
+window.visualViewport?.addEventListener('resize',positionMenu);
+window.visualViewport?.addEventListener('scroll',positionMenu);
 const media=window.matchMedia('(max-width:1349px)');
 const narrow=window.matchMedia('(max-width:899px)');
 media.addEventListener('change',arrange);narrow.addEventListener('change',arrange);
