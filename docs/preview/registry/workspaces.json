@@ -1,0 +1,209 @@
+{
+  "version": "1.0.0",
+  "project": "b3eq-one",
+  "status": "design",
+  "workspaces": [
+    {
+      "id": "W01",
+      "name": "Mission Control",
+      "panels": [
+        "topology",
+        "telemetry",
+        "incidents"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W02",
+      "name": "Business Workspace",
+      "panels": [
+        "customers",
+        "hosting",
+        "subscriptions"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W03",
+      "name": "Intelligence Workspace",
+      "panels": [
+        "assistant",
+        "plans",
+        "approvals"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W04",
+      "name": "Developer Studio",
+      "panels": [
+        "repositories",
+        "pipelines",
+        "containers"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W05",
+      "name": "Spatial Infrastructure",
+      "panels": [
+        "graph",
+        "regions",
+        "networks"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W06",
+      "name": "Executive Overview",
+      "panels": [
+        "cost",
+        "risk",
+        "outcomes"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W07",
+      "name": "Custom Canvas",
+      "panels": [
+        "custom-panels"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W08",
+      "name": "Infrastructure Intelligence Studio",
+      "panels": [
+        "intent-graph",
+        "blast-radius",
+        "risk",
+        "ownership",
+        "deployment-validation",
+        "code-cloud-business"
+      ],
+      "status": "planned",
+      "reference": "https://chatgpt.com/s/i_6b04c7762e388191b4d27932b81c3ed5"
+    },
+    {
+      "id": "W09",
+      "name": "Command Code Studio",
+      "panels": [
+        "terminal",
+        "code-understanding",
+        "assistant",
+        "model-routing",
+        "preferences",
+        "command-runner",
+        "session-history",
+        "integrations"
+      ],
+      "status": "planned",
+      "reference": "https://chatgpt.com/s/i_6b04c788c4dc8191ad9b94407cca2ecf"
+    },
+    {
+      "id": "W10",
+      "name": "AI DevSecOps Command Center",
+      "panels": [
+        "model-selection",
+        "token-metering",
+        "pipeline",
+        "incidents",
+        "enterprise-policy",
+        "service-status"
+      ],
+      "status": "planned",
+      "reference": "https://chatgpt.com/s/i_6b04c7d5eeac81918b5d9a2a60016f33"
+    },
+    {
+      "id": "W11",
+      "name": "Engineering Cockpit",
+      "panels": [
+        "ssh",
+        "api-explorer",
+        "processes"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W12",
+      "name": "Security Operations Center",
+      "panels": [
+        "threats",
+        "identity",
+        "firewall"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W13",
+      "name": "Automation Studio",
+      "panels": [
+        "workflow-editor",
+        "triggers",
+        "traces"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W14",
+      "name": "FinOps Studio",
+      "panels": [
+        "budgets",
+        "forecast",
+        "allocation"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W15",
+      "name": "Digital Twin Workspace",
+      "panels": [
+        "digital-twin",
+        "simulation",
+        "dependencies"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W16",
+      "name": "AI Agent Command Center",
+      "panels": [
+        "agents",
+        "delegation",
+        "oversight"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W17",
+      "name": "Resilience Studio",
+      "panels": [
+        "backups",
+        "restore",
+        "recovery"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "W18",
+      "name": "Application Factory",
+      "panels": [
+        "catalog",
+        "templates",
+        "provisioning"
+      ],
+      "status": "planned"
+    }
+  ],
+  "shared": {
+    "themes": [
+      "light",
+      "dark",
+      "system"
+    ],
+    "authorization": "server-authoritative",
+    "layoutScope": "tenant-user",
+    "evidenceRequired": true
+  }
+}
