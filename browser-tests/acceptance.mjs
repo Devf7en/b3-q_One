@@ -132,6 +132,17 @@ try{
  await page.getByRole('button',{name:'Dock Inspector',exact:true}).click();
  assert.equal(await page.locator('#object-inspector').evaluate(e=>e.classList.contains('floating-inspector')),false);
  await page.locator('#dock-toggle').click();
+ await page.locator('#dock-toggle').click();
+ await page.getByRole('button',{name:'Float Environment Explorer',exact:true}).click();
+ assert.equal(await page.locator('#environments').evaluate(e=>getComputedStyle(e).position),'fixed');
+ await page.getByRole('button',{name:'Float Console & Activity',exact:true}).click();
+ assert.equal(await page.locator('#activity-console').evaluate(e=>getComputedStyle(e).position),'fixed');
+ await page.reload();
+ await page.waitForFunction(()=>document.getElementById('environments').classList.contains('universal-floating'));
+ await page.locator('#dock-toggle').click();
+ await page.getByRole('button',{name:'Dock Environment Explorer',exact:true}).click();
+ await page.getByRole('button',{name:'Dock Console & Activity',exact:true}).click();
+ await page.locator('#dock-toggle').click();
  await page.setViewportSize({width:390,height:844});
  assert.equal(await page.locator('#workspace').isVisible(),true);
  assert.deepEqual(errors,[]);
