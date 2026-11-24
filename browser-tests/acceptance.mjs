@@ -152,6 +152,9 @@ try{
  assert.ok(headerMetrics.height<=65,'Mobile header must remain a single row');
  assert.ok(headerMetrics.scrollWidth<=headerMetrics.clientWidth+1,'Mobile header must not overflow horizontally');
  await page.locator('#topbar-overflow summary').click();
+ const popoverBounds=await page.locator('#topbar-overflow-content').boundingBox();
+ assert.ok(popoverBounds.x>=11,'Mobile More menu needs a left safe gutter');
+ assert.ok(popoverBounds.x+popoverBounds.width<=390-11,'Mobile More menu needs a right safe gutter');
  assert.equal(await page.locator('#workspace').isVisible(),true);
  assert.equal(await page.locator('#environment').isVisible(),true);
  assert.equal(await page.locator('#theme').isVisible(),true);
