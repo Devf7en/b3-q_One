@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {createGovernanceService} from '../packages/transactional-governance/index.mjs';
+const principal={tenantId:'t1',userId:'u1',role:'operator'};
+function fixture(fail=false){const calls=[];const service=createGovernanceService({transaction:async(ctx,work)=>work({query:async(sql,args)=>{calls.push(sql);if(fail&&sql.startsWith('INSERT INTO one_runtime.audit_events'))throw Error('audit failure');return {rows:sql.startsWith('SELECT id FROM')?[{id:'p1'}]:[]};}},principal),clock:()=> '2026-01-01T00:00:00.000Z'});return {service,calls};}
+const input={projectId:'p1',id:'plan1',version:1,manifest:{kind:'demo'},surface:'control'};
+test('plan and audit use same transaction callback',async()=>{const {service,calls}=fixture();const p=await service.create({},input);assert.equal(p.digest.length,64);assert.ok(calls.findIndex(s=>s.startsWith('INSERT INTO one_runtime.plans'))<calls.findIndex(s=>s.startsWith('INSERT INTO one_runtime.audit_events')));});
+test('audit failure propagates to transaction boundary',async()=>{const {service}=fixture(true);await assert.rejects(service.create({},input),/audit failure/);});
+test('observatory cannot create plan',async()=>{const {service,calls}=fixture();await assert.rejects(service.create({},{...input,surface:'observatory'}));assert.equal(calls.some(s=>s.startsWith('INSERT')),false);});
