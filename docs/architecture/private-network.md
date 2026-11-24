@@ -1,0 +1,3 @@
+# One::Network — 13C.5
+
+Current Compose application publishes only loopback port 4173; PostgreSQL belongs to internal data network with no host port. Keep the demo shell off the data network. Future authenticated API will bridge application and data networks with least-privilege database credentials. No Docker socket mounts, direct browser database access, public database ports or implicit provider execution. Public GitHub Pages stays independent. TLS ingress and production DNS are deferred. Network acceptance checks inspect actual Compose containers and verify isolation; they do not prove production firewall security.
