@@ -9,9 +9,9 @@ export function createBrowserSessions({authenticate,clock=Date.now,ttlMs=300000,
  function key(header){if(typeof header!=='string'||header.length>8192)return null;const values=header.split(';').map(s=>s.trim()).filter(s=>s.startsWith(name+'='));if(values.length!==1)return null;const id=values[0].slice(name.length+1);return /^[a-f0-9]{64}$/.test(id)?digest(id):null;}
  function sweep(now){for(const [k,v] of sessions)if(v.expiresAt<=now)sessions.delete(k);}
  return Object.freeze({
- async issue({token,tenantId}){
+ async issue({token,tenantId,expectedSubject}){
  if(typeof token!=='string'||!token||token.length>8192||!uuid.test(tenantId??''))throw Error('Invalid session input');
- const principal=await authenticate(token,tenantId);
+ const principal=await authenticate(token,tenantId,expectedSubject);
  if(!principal||principal.tenantId!==tenantId||!principal.userId)throw Error('Unauthorized');
  const now=clock();sweep(now);if(sessions.size>=maxSessions)throw Error('Session capacity reached');
  const id=randomBytes(32).toString('hex');sessions.set(digest(id),{token,tenantId,userId:principal.userId,expiresAt:now+ttlMs});
