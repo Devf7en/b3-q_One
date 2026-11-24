@@ -25,6 +25,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
+          export PATH=/usr/lib/postgresql/16/bin:$PATH
+          pg_dump --version | grep -E ' 16\.'
+          pg_restore --version | grep -E ' 16\.'
           for migration in database/migrations/*.sql; do
             psql -v ON_ERROR_STOP=1 -f "$migration"
           done
