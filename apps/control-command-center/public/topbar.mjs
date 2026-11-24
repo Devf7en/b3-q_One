@@ -14,7 +14,7 @@ function arrange(){
  const compact=width<960,medium=width<1400;
  for(let i=0;i<ordered.length;i++){
  const move=medium&&(i>=5||compact&&i!==3);
- (move?content:bar).append(ordered[i]);
+ if(move)content.append(ordered[i]);else bar.insertBefore(ordered[i],overflow);
  }
  if(compact){bar.insertBefore(overflow,account);}else{bar.insertBefore(overflow,account);}
  bar.append(account);
