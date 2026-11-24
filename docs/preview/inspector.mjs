@@ -18,9 +18,27 @@ const specialized={
  automation:{id:'wf-001',name:'Demo workflow',kind:'Workflow',fields:[['timeout','Timeout seconds',1,3600,60],['enabled','Enabled',null,null,false]]},
  intelligence:{id:'agent-001',name:'Demo agent',kind:'AI Agent',fields:[['budget','Budget micro-USD',0,1000000,100],['review','Human review required',null,null,true]]}
 };
+const operations={
+ command:['Review command policy','Propose command policy change'],
+ infrastructure:['Inspect compute allocation','Propose capacity change'],
+ provisioning:['Review provisioning requirements','Propose provisioning plan'],
+ hosting:['Inspect hosting allocation','Propose hosting configuration'],
+ domains:['Inspect DNS configuration','Propose DNS change'],
+ containers:['Inspect runtime configuration','Propose replica change'],
+ developer:['Review pipeline configuration','Propose build policy change'],
+ data:['Inspect database configuration','Propose connection policy change'],
+ automation:['Review workflow configuration','Propose workflow revision'],
+ intelligence:['Review agent constraints','Propose agent policy change'],
+ security:['Review security policy','Propose security policy revision'],
+ observability:['Review freshness policy','Propose evidence policy change'],
+ resilience:['Review recovery objectives','Propose restore exercise'],
+ finops:['Review budget allocation','Propose budget revision'],
+ business:['Review subscription policy','Propose seat allocation'],
+ marketplace:['Review catalog configuration','Propose listing revision']
+};
 export function createInspector(host,{isReadOnly,onPlan}){
  const el=(tag,text='')=>{const n=document.createElement(tag);n.textContent=text;return n;};
- let selected=0,tab='Properties',items=fixtures,draft={...fixtures[0]};
+ let environmentId='command';let selected=0,tab='Properties',items=fixtures,draft={...fixtures[0]};
  function render(){
  const readOnly=isReadOnly(),original=items[selected];host.replaceChildren(el('h2','Object Inspector'),el('p','Synthetic resources — no provider connection'));
  const picker=el('select');picker.setAttribute('aria-label','Inspect resource');items.forEach((r,i)=>{const o=el('option',r.name);o.value=String(i);picker.append(o);});picker.value=String(selected);picker.onchange=()=>{selected=Number(picker.value);draft={...items[selected]};render();};
@@ -32,10 +50,11 @@ export function createInspector(host,{isReadOnly,onPlan}){
  }
  if(!readOnly){const save=el('button','Save change plan');save.type='button';save.onclick=()=>{if(!draft.name.trim()||draft.name.length>120||!fields.filter(([, ,min])=>Number.isFinite(min)).every(([key,,a,b])=>Number.isInteger(draft[key])&&draft[key]>=a&&draft[key]<=b)){output.textContent='Invalid properties.';return;}if(JSON.stringify(draft)===JSON.stringify(original)){output.textContent='No changes.';return;}onPlan({before:{...original},after:{...draft},executable:false});draft={...original};render();};const reset=el('button','Revert properties');reset.type='button';reset.onclick=()=>{draft={...original};render();};host.append(save,reset);}
  }else if(tab==='Details'){host.append(el('pre',JSON.stringify(original,null,2)));}
- else if(tab==='Tools'){const inspect=el('button','Inspect configuration');inspect.type='button';inspect.onclick=()=>{output.textContent=JSON.stringify(original);};host.append(inspect);}
+ else if(tab==='Tools'){const inspect=el('button',operations[environmentId]?.[0]??'Inspect configuration');inspect.type='button';inspect.onclick=()=>{output.textContent=JSON.stringify(original);};host.append(inspect);}
+ else if(tab==='Actions'){host.append(el('p','Planning only — no execution or provider connection.'));const operation=operations[environmentId]?.[1];if(operation&&!readOnly){const propose=el('button',operation);propose.type='button';propose.onclick=()=>{onPlan({environment:environmentId,operation,resourceId:original.id,before:{...original},after:{...original},executable:false,requiresReview:true});output.textContent='Non-executable proposal recorded.';};host.append(propose);}else host.append(el('p','Read-only surface.')); }
  else if(tab==='Security'){host.append(el('p','Authentication unavailable. Execution disabled. Independent approval required.'));}
  else host.append(el('p',tab+' — authoritative integration unavailable.'));
  host.append(output);
  }
- render();return {setEnvironment(id){const spec=specialized[id];items=spec?[{...spec,...Object.fromEntries(spec.fields.map(([key,,,,value])=>[key,value]))},...fixtures]:fixtures;selected=0;draft={...items[0]};render();},refresh(){if(isReadOnly())draft={...items[selected]};render();}};
+ render();return {setEnvironment(id){environmentId=id;const spec=specialized[id];items=spec?[{...spec,...Object.fromEntries(spec.fields.map(([key,,,,value])=>[key,value]))},...fixtures]:fixtures;selected=0;draft={...items[0]};render();},refresh(){if(isReadOnly())draft={...items[selected]};render();}};
 }
