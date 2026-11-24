@@ -15,5 +15,6 @@ jobs:
           curl --fail http://127.0.0.1:4173/registry/workspaces
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4173/.env)" = 404
           docker compose exec -T postgres pg_isready -U postgres -d one_dev
+      - run: bash scripts/check-network.sh
       - if: always()
         run: docker compose down -v
