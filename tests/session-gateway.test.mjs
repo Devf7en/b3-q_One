@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createSessionGateway} from '../packages/session-gateway/index.mjs';
+import {createBrowserSessions} from '../packages/browser-session/index.mjs';
+test('session gateway isolates credentials, origin and read-only routes',async()=>{
+ const tenantId='00000000-0000-0000-0000-000000000001',origin='https://one.example';
+ const sessions=createBrowserSessions({authenticate:async()=>({tenantId,userId:'fixture'})});
+ const issued=await sessions.issue({token:'server-token',tenantId});
+ const cookie=issued.setCookie.split(';')[0];
+ const dispatch=createSessionGateway({sessions,origin,gateway:async input=>{assert.equal(input.token,'server-token');assert.equal(input.tenantId,tenantId);return {status:200,body:{records:[]}};}});
+ const path='/v1/observatory/evidence?limit=25';
+ assert.equal((await dispatch({method:'GET',path})).status,401);
+ assert.equal((await dispatch({method:'GET',path,headers:{cookie,origin:'https://other.example'}})).status,403);
+ assert.equal((await dispatch({method:'POST',path,headers:{cookie,origin}})).status,405);
+ assert.equal((await dispatch({method:'GET',path:'/v1/control/plans',headers:{cookie}})).status,404);
+ const read=await dispatch({method:'GET',path,headers:{cookie,'sec-fetch-site':'same-origin'}});assert.equal(read.status,200);assert.deepEqual(read.body,{records:[]});assert.equal(read.headers['Cache-Control'],'no-store');
+ assert.equal((await dispatch({method:'POST',path:'/session/logout',headers:{cookie}})).status,403);
+ const logout=await dispatch({method:'POST',path:'/session/logout',headers:{cookie,origin}});assert.equal(logout.status,200);assert.match(logout.headers['Set-Cookie'],/Max-Age=0$/);
+ assert.equal((await dispatch({method:'GET',path,headers:{cookie}})).status,401);
+});
