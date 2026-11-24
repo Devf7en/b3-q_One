@@ -101,6 +101,7 @@ floatGrip.onpointerdown=e=>{const host=$('object-inspector');if(dockPrefs.locked
 const floatingKey='one:floating-panels:v1';
 let floatingPanels={};
 try{const saved=JSON.parse(localStorage.getItem(floatingKey));for(const [id] of docks){const v=saved?.[id];if(v&&typeof v.active==='boolean'&&Number.isFinite(v.x)&&Number.isFinite(v.y))floatingPanels[id]={active:v.active,x:Math.max(0,v.x),y:Math.max(0,v.y)};}}catch{}
+const floatingApply=new Map();
 const floatingControls=node('section','');floatingControls.append(node('h3','Floating panels'));dockSettings.append(floatingControls);
 function persistFloating(){try{localStorage.setItem(floatingKey,JSON.stringify(floatingPanels));}catch{}}
 for(const [id,name] of docks){
@@ -114,7 +115,7 @@ for(const [id,name] of docks){
  toggle.onclick=()=>{if(!dockPrefs.locked){state.active=!state.active;apply();}};
  grip.onpointerdown=e=>{if(dockPrefs.locked||!state.active||e.button!==0)return;e.preventDefault();grip.setPointerCapture(e.pointerId);const x=e.clientX,y=e.clientY,sx=state.x,sy=state.y;grip.onpointermove=m=>{state.x=sx+m.clientX-x;state.y=sy+m.clientY-y;apply();};grip.onlostpointercapture=()=>{grip.onpointermove=null;};};
  grip.onkeydown=e=>{if(dockPrefs.locked||!state.active||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();state.x+=e.key==='ArrowLeft'?-10:e.key==='ArrowRight'?10:0;state.y+=e.key==='ArrowUp'?-10:e.key==='ArrowDown'?10:0;apply();};
- window.addEventListener('resize',apply);apply();
+ floatingApply.set(id,apply);window.addEventListener('resize',apply);apply();
 }
 
 let focusedDock=null;
@@ -129,3 +130,5 @@ const stackToggle=button('Stack Inspector and Console',()=>{if(dockPrefs.locked)
 const stackTabs=[['object-inspector','Inspector'],['activity-console','Console']].map(([id,name])=>{const tab=button(name,()=>{stackActive=id;applyStack();});stackBar.append(tab);return [id,tab];});
 function applyStack(){const eligible=stackEnabled&&!floatingPanels['object-inspector']?.active&&!floatingPanels['activity-console']?.active&&dockPrefs.visible[1]&&dockPrefs.visible[2];stackBar.hidden=!eligible;document.documentElement.classList.toggle('dock-stack-active',eligible);for(const [id,tab] of stackTabs){$(id).classList.toggle('dock-stack-inactive',eligible&&id!==stackActive);tab.setAttribute('aria-pressed',String(id===stackActive));}stackToggle.textContent=stackEnabled?'Unstack Inspector and Console':'Stack Inspector and Console';stackToggle.setAttribute('aria-pressed',String(stackEnabled));try{localStorage.setItem(stackKey,JSON.stringify({enabled:stackEnabled,active:stackActive}));}catch{}}
 dockMenu.addEventListener('click',()=>applyStack());dockMenu.addEventListener('change',()=>applyStack());applyStack();
+
+dockSettings.append(button('Export complete panel layout',()=>{transfer.value=JSON.stringify({format:'one-panel-layout-v2',dock:{width:dockPrefs.width,inspectorWidth:dockPrefs.inspectorWidth,side:dockPrefs.side,visible:[...dockPrefs.visible]},floating:Object.fromEntries(docks.map(([id])=>[id,{...floatingPanels[id]}])),stack:{enabled:stackEnabled,active:stackActive}},null,2);transferStatus.textContent='Complete panel layout exported.';}),button('Import complete panel layout',()=>{if(dockPrefs.locked)return;try{if(transfer.value.length>8192)throw Error();const v=JSON.parse(transfer.value);if(v?.format!=='one-panel-layout-v2'||!validPortable({...v.dock,format:'one-dock-layout-v1'})||typeof v.stack?.enabled!=='boolean'||!['object-inspector','activity-console'].includes(v.stack.active))throw Error();for(const [id] of docks){const x=v.floating?.[id];if(!x||typeof x.active!=='boolean'||!Number.isFinite(x.x)||!Number.isFinite(x.y)||x.x<0||x.y<0||x.x>100000||x.y>100000)throw Error();}dockPrefs={width:v.dock.width,inspectorWidth:v.dock.inspectorWidth,side:v.dock.side,visible:[...v.dock.visible],locked:false};for(const [id] of docks){const x=v.floating[id];Object.assign(floatingPanels[id],{active:x.active,x:x.x,y:x.y});}stackEnabled=v.stack.enabled;stackActive=v.stack.active;applyDockPrefs();for(const apply of floatingApply.values())apply();applyStack();transferStatus.textContent='Complete panel layout imported.';}catch{transferStatus.textContent='Invalid complete panel layout.';}}));
