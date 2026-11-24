@@ -90,6 +90,18 @@ try{
  assert.equal(await inspector.getByLabel('Virtual CPUs').isDisabled(),true);
  assert.equal(await inspector.getByRole('button',{name:'Save change plan',exact:true}).count(),0);
  await page.locator('#toggle').click();
+ await page.locator('#dock-toggle').click();
+ await page.getByLabel('Inspector dock side').selectOption('left');
+ await page.getByRole('button',{name:'Lock dock layout',exact:true}).click();
+ assert.equal(await page.getByLabel('Inspector dock side').isDisabled(),true);
+ await page.reload();
+ await page.waitForFunction(()=>document.documentElement.dataset.inspectorSide==='left');
+ await page.locator('#dock-toggle').click();
+ assert.equal(await page.getByLabel('Inspector dock side').isDisabled(),true);
+ await page.getByRole('button',{name:'Unlock dock layout',exact:true}).click();
+ await page.getByRole('button',{name:'Reset dock layout',exact:true}).click();
+ assert.equal(await page.locator('html').getAttribute('data-inspector-side'),'right');
+ await page.locator('#dock-toggle').click();
  await page.setViewportSize({width:390,height:844});
  assert.equal(await page.locator('#workspace').isVisible(),true);
  assert.deepEqual(errors,[]);
