@@ -1,0 +1,38 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createGovernanceRecords} from '../packages/governance-records/index.mjs';
+const tenantId='00000000-0000-0000-0000-000000000001';
+const requestId='00000000-0000-0000-0000-000000000003';
+const operator='00000000-0000-0000-0000-000000000002';
+const approver='00000000-0000-0000-0000-000000000004';
+function fixture(role='operator',rows=[{id:requestId,status:'pending'}]){
+ const calls=[];
+ const client={query:async(sql,args)=>{calls.push({sql,args});return {rows:sql.includes('RETURNING')?rows:[]};}};
+ const records=createGovernanceRecords({transaction:async({tenantId:t},work)=>{assert.equal(t,tenantId);return work(client,{tenantId:t,userId:role==='operator'?operator:approver,role});}});
+ return {records,calls};
+}
+test('register writes request and audit inside tenant-scoped transaction',async()=>{
+ const {records,calls}=fixture();
+ const result=await records.register({token:'fixture',tenantId,requestId,operation:'service.restart',target:'staging',reason:'incident'});
+ assert.deepEqual(result,{id:requestId,status:'pending',executable:false});
+ assert.equal(calls.length,2);
+ assert.deepEqual(calls[0].args.slice(0,2),[tenantId,requestId]);
+ assert.equal(calls[1].args[3],'registered');
+});
+test('only approver can decide and decisions remain non-executable',async()=>{
+ const {records,calls}=fixture('approver',[{id:requestId,status:'approved'}]);
+ const result=await records.decide({token:'fixture',tenantId,requestId,decision:'approved'});
+ assert.equal(result.executable,false);
+ assert.equal(result.status,'approved');
+ assert.match(calls[0].sql,/requested_by<>\$2/);
+ assert.equal(calls[1].args[3],'approved');
+ await assert.rejects(fixture('operator').records.decide({token:'fixture',tenantId,requestId,decision:'approved'}),/Forbidden/);
+});
+test('rejects invalid inputs, duplicate registrations and missing decisions',async()=>{
+ const args={token:'fixture',tenantId,requestId,operation:'service.restart',target:'staging',reason:'incident'};
+ await assert.rejects(fixture().records.register({...args,requestId:'bad'}),/Invalid request/);
+ await assert.rejects(fixture('approver').records.register(args),/Forbidden/);
+ await assert.rejects(fixture('operator',[]).records.register(args),/Duplicate request/);
+ await assert.rejects(fixture('approver',[]).records.decide({token:'fixture',tenantId,requestId,decision:'approved'}),/Not pending/);
+ await assert.rejects(fixture('approver').records.decide({token:'fixture',tenantId,requestId,decision:'executed'}),/Invalid decision/);
+});
