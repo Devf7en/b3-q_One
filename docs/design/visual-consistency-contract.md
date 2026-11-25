@@ -10,8 +10,8 @@ Use one consistent font stack, line-height and weight hierarchy across responsiv
 ## Navigation and safe areas
 Keep one-row header: brand left, actions right, account at right edge.
 Move controls into overflow without cloning them. Maintain existing keyboard and click behavior.
-Mobile More menu must fit inside visible viewport with at least 12px left/right margins and 14px internal padding.
-Controls should be at least 42px tall. Escape closes the More menu. No horizontal clipping.
+Mobile More and My Account overlays share the same 240px maximum width, 8px right safe gutter, 10px padding, corner radius and shadow; narrower viewports must not clip.
+Controls should be at least 42px tall. Escape closes the More menu. Mobile submenus replace More, expose Back to More navigation, and never stack behind it. No horizontal clipping.
 
 ## Functional preservation
 Preserve 16 environments, 18 workspaces, 8 factories, docking, themes, Control Center/Observatory modes.
