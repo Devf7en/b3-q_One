@@ -79,3 +79,6 @@ main label,main button,main select,main input,main textarea,nav button{font-fami
 article p,article li,main p{line-height:1.5}
 button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent,#4389db);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}}
+
+/* Mobile More popover matches the My Account panel's 240px width. */
+@media(max-width:899px){#topbar-overflow-content{width:min(240px,calc(100vw - 24px));max-width:min(240px,calc(100vw - 24px));right:12px;left:auto}}
