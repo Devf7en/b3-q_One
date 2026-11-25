@@ -25,8 +25,10 @@ function arrange(){
 function positionMenu(){
  if(!overflow.open||window.innerWidth>=900)return;
  const viewport=window.visualViewport;
- const left=(viewport?.offsetLeft||0)+12;
- const width=Math.max(180,(viewport?.width||window.innerWidth)-24);
+ const visibleLeft=viewport?.offsetLeft||0;
+ const visibleWidth=viewport?.width||window.innerWidth;
+ const width=Math.min(240,Math.max(0,visibleWidth-24));
+ const left=visibleLeft+visibleWidth-width-12;
  const top=Math.max(0,document.querySelector('header').getBoundingClientRect().bottom+6);
  const styles={position:'fixed',left:left+'px',right:'auto',width:width+'px',maxWidth:width+'px',boxSizing:'border-box',top:top+'px'};
  for(const [key,value] of Object.entries(styles))content.style.setProperty(key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),value,'important');
