@@ -27,8 +27,11 @@ function positionMenu(){
  const viewport=window.visualViewport;
  const visibleLeft=viewport?.offsetLeft||0;
  const visibleWidth=viewport?.width||window.innerWidth;
- const width=Math.min(240,Math.max(0,visibleWidth-24));
- const left=visibleLeft+visibleWidth-width-12;
+ const accountPanel=document.getElementById('account-menu');
+ const accountWidth=accountPanel?parseFloat(getComputedStyle(accountPanel).width)||240:240;
+ const gutter=8;
+ const width=Math.min(accountWidth,Math.max(0,visibleWidth-gutter*2));
+ const left=visibleLeft+visibleWidth-width-gutter;
  const top=Math.max(0,document.querySelector('header').getBoundingClientRect().bottom+6);
  const styles={position:'fixed',left:left+'px',right:'auto',width:width+'px',maxWidth:width+'px',boxSizing:'border-box',top:top+'px'};
  for(const [key,value] of Object.entries(styles))content.style.setProperty(key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),value,'important');
