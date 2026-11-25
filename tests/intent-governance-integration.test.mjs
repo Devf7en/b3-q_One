@@ -43,3 +43,24 @@ test('read-only command is non-executable without an adapter',()=>{
  assert.equal(read.executable,false);
  assert.throws(()=>planCommand({workspaceId:'W09',operation:'shell.exec',target:'staging'}),/Unsupported operation/);
 });
+
+test('workflow rejects cyclic and missing dependencies before any execution',()=>{
+ assert.throws(()=>planWorkflow([{id:'a',kind:'change',dependsOn:['b']},{id:'b',kind:'read',dependsOn:['a']}]),/Cycle or unknown dependency/);
+ assert.throws(()=>planWorkflow([{id:'a',kind:'change',dependsOn:['unknown']}]),/Cycle or unknown dependency/);
+ assert.throws(()=>planWorkflow([{id:'a',kind:'read',dependsOn:[]},{id:'a',kind:'change',dependsOn:[]}]),/Invalid step/);
+});
+
+test('release gate requires unique, sourced, timestamped passing evidence',()=>{
+ const gates=['build','tests','dependency-scan','secret-scan','policy'];
+ const evidence=gates.map(gate=>({gate,status:'pass',source:'ci:'+gate,observed_at:'2026-11-25T00:00:00Z'}));
+ const eligible=evaluateRelease(evidence,[]);
+ assert.equal(eligible.decision,'eligible-for-review');
+ assert.equal(eligible.executable,false);
+ assert.equal(eligible.authorizationRequired,true);
+ assert.equal(evaluateRelease([...evidence,evidence[0]],[]).decision,'blocked');
+ assert.equal(evaluateRelease(evidence.map(e=>e.gate==='secret-scan'?{...e,source:''}:e),[]).decision,'blocked');
+ const findings=[{id:'CVE-example',severity:'critical',status:'open',source:'scan'}];
+ const blocked=evaluateRelease(evidence,findings);
+ assert.equal(blocked.decision,'blocked');
+ assert.ok(blocked.blockers.includes('finding:CVE-example'));
+});
