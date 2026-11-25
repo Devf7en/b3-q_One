@@ -85,3 +85,6 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
 /* Root token must override the original 15px :root shorthand for rem consistency. */
 :root{font-size:16px}
+
+/* More and My Account use identical mobile overlay dimensions and alignment. */
+@media(max-width:899px){#topbar-overflow-content{width:min(240px,calc(100vw - 16px));max-width:calc(100vw - 16px);right:8px;left:auto;padding:10px;border-radius:8px;box-shadow:0 8px 24px #0004}}
