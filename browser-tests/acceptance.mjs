@@ -164,6 +164,7 @@ try{
  assert.ok(typography.font.includes('system')||typography.font.includes('SF Pro'),'Use system-native font stack');
  assert.ok(typography.buttonHeight>=42,'Touch menu controls must be at least 42px high');
  const popoverBounds=await page.locator('#topbar-overflow-content').boundingBox();
+ assert.ok(popoverBounds.width<=240&&popoverBounds.width>=239,'More menu must match the 240px My Account width');
  assert.ok(popoverBounds.x>=11,'Mobile More menu needs a left safe gutter');
  assert.ok(popoverBounds.x+popoverBounds.width<=390-11,'Mobile More menu needs a right safe gutter');
  assert.equal(await page.locator('#workspace').isVisible(),true);
