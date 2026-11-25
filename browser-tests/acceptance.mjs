@@ -190,6 +190,7 @@ try{
  await page.setViewportSize({width:768,height:900});
  assert.ok((await page.locator('header').evaluate(e=>e.getBoundingClientRect().height))<=70);
  await page.setViewportSize({width:1440,height:900});
+ await page.waitForFunction(()=>document.querySelector('#workspace')?.closest('#topbar-actions')&&document.querySelector('#topbar-overflow')?.hidden===true);
  assert.equal(await page.locator('#workspace').isVisible(),true);
  assert.equal(await page.locator('#account-toggle').isVisible(),true);
  assert.deepEqual(errors,[]);
