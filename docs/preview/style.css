@@ -88,3 +88,22 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
 /* More and My Account use identical mobile overlay dimensions and alignment. */
 @media(max-width:899px){#topbar-overflow-content{width:min(240px,calc(100vw - 16px));max-width:calc(100vw - 16px);right:8px;left:auto;padding:10px;border-radius:8px;box-shadow:0 8px 24px #0004}}
+
+/* Environment Explorer: adaptive navigation, not a second global toolbar.
+   Keep the same DOM and existing dock/floating interactions on every viewport. */
+@media(max-width:700px){
+ .shell:not(:has(>#environments.universal-floating))>#environments{
+  display:flex;flex-direction:row;align-items:stretch;gap:6px;
+  width:100%;max-width:100%;min-width:0;
+  overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+  padding:8px 12px;border-right:0;border-bottom:1px solid var(--line);
+  scrollbar-width:thin;
+ }
+ .shell:not(:has(>#environments.universal-floating))>#environments button{
+  flex:0 0 auto;width:auto;max-width:min(78vw,240px);
+  min-height:42px;white-space:nowrap;text-align:center;
+  scroll-snap-align:start;font-size:var(--one-type-sm);
+ }
+ .shell:not(:has(>#environments.universal-floating))>main{min-width:0}
+}
