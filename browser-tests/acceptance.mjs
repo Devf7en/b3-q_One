@@ -175,6 +175,18 @@ try{
  await page.locator('#theme').selectOption('dark');
  await page.keyboard.press('Escape');
  assert.equal(await page.locator('#topbar-overflow').evaluate(e=>e.open),false);
+ await page.locator('#topbar-overflow summary').click();
+ await page.locator('#topbar-overflow-content #dock-toggle').click();
+ assert.equal(await page.locator('#topbar-overflow').evaluate(e=>e.open),false,'More must close when Docks opens');
+ assert.equal(await page.locator('#dock-menu').isVisible(),true,'Docks submenu must be visible');
+ await page.getByRole('button',{name:'Back to More menu'}).click();
+ assert.equal(await page.locator('#dock-menu').isVisible(),false,'Back closes submenu');
+ assert.equal(await page.locator('#topbar-overflow').evaluate(e=>e.open),true,'Back restores More');
+ await page.locator('#topbar-overflow-content #preferences').click();
+ assert.equal(await page.locator('#topbar-overflow').evaluate(e=>e.open),false,'More closes when Preferences opens');
+ assert.equal(await page.locator('#global-info').isVisible(),true,'Preferences submenu is visible');
+ await page.getByRole('button',{name:'Back to More menu'}).click();
+ await page.keyboard.press('Escape');
  await page.setViewportSize({width:768,height:900});
  assert.ok((await page.locator('header').evaluate(e=>e.getBoundingClientRect().height))<=70);
  await page.setViewportSize({width:1440,height:900});
