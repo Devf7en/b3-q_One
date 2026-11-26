@@ -21,6 +21,25 @@ DO $$ BEGIN
  IF (SELECT count(*) FROM one_runtime.governance_requests)<>1 THEN RAISE EXCEPTION 'tenant request missing'; END IF;
  IF (SELECT count(*) FROM one_runtime.governance_audit)<>1 THEN RAISE EXCEPTION 'audit missing'; END IF;
 END $$;
+-- Verify append-only enforcement even when a role has UPDATE/DELETE privileges.
+RESET ROLE;
+GRANT UPDATE,DELETE ON one_runtime.governance_audit TO one_governance_test;
+SET ROLE one_governance_test;
+SELECT set_config('one.tenant_id','00000000-0000-0000-0000-000000000001',true);
+DO $ BEGIN
+ BEGIN
+  UPDATE one_runtime.governance_audit SET event='approved';
+  RAISE EXCEPTION 'audit update unexpectedly allowed';
+ EXCEPTION WHEN insufficient_privilege THEN
+  IF SQLSTATE <> '42501' THEN RAISE; END IF;
+ END;
+ BEGIN
+  DELETE FROM one_runtime.governance_audit;
+  RAISE EXCEPTION 'audit delete unexpectedly allowed';
+ EXCEPTION WHEN insufficient_privilege THEN
+  IF SQLSTATE <> '42501' THEN RAISE; END IF;
+ END;
+END $;
 SAVEPOINT before_self_approval;
 DO $$ BEGIN
  BEGIN
