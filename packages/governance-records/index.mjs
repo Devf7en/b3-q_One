@@ -22,11 +22,23 @@ export function createGovernanceRecords({transaction}){
    return transaction({token,tenantId},async(client,principal)=>{
     if(principal.role!=='approver')throw Error('Forbidden');
     const {rows}=await client.query(
-     "UPDATE one_runtime.governance_requests SET status=$1,decided_by=$2,decided_at=NOW() WHERE tenant_id=$3 AND id=$4 AND status='pending' AND requested_by<>$2 RETURNING id,status",
+     "UPDATE one_runtime.governance_requests SET status=$1,decided_by=$2,decided_at=NOW() WHERE tenant_id=$3 AND id=$4 AND status='pending' AND expires_at>NOW() AND requested_by<>$2 RETURNING id,status",
      [decision,principal.userId,tenantId,requestId]);
     if(rows.length!==1)throw Error('Not pending or self-approval prohibited');
     await client.query('INSERT INTO one_runtime.governance_audit (tenant_id,request_id,actor_id,event) VALUES ($1,$2,$3,$4)',[tenantId,requestId,principal.userId,decision]);
     return {id:requestId,status:decision,executable:false};
+   });
+  },
+  async expire({token,tenantId,requestId}){
+   if(!validId(tenantId)||!validId(requestId))throw Error('Invalid request');
+   return transaction({token,tenantId},async(client,principal)=>{
+    if(!['operator','approver'].includes(principal.role))throw Error('Forbidden');
+    const {rows}=await client.query(
+     "UPDATE one_runtime.governance_requests SET status='expired',decided_at=NOW() WHERE tenant_id=$1 AND id=$2 AND status='pending' AND expires_at<=NOW() RETURNING id,status",
+     [tenantId,requestId]);
+    if(rows.length!==1)throw Error('Not expired or no pending request');
+    await client.query('INSERT INTO one_runtime.governance_audit (tenant_id,request_id,actor_id,event) VALUES ($1,$2,$3,$4)',[tenantId,requestId,principal.userId,'expired']);
+    return {id:requestId,status:'expired',executable:false};
    });
   }
  });
