@@ -29,6 +29,30 @@ export function createGovernanceRecords({transaction}){
     return {id:requestId,status:decision,executable:false};
    });
   },
+  async inspect({token,tenantId,requestId}){
+   if(!validId(tenantId)||!validId(requestId))throw Error('Invalid request');
+   return transaction({token,tenantId},async(client,principal)=>{
+    if(!['viewer','operator','approver'].includes(principal.role))throw Error('Forbidden');
+    const {rows:requests}=await client.query(
+     'SELECT id,status,requested_by,decided_by,decided_at,expires_at FROM one_runtime.governance_requests WHERE tenant_id=$1 AND id=$2',
+     [tenantId,requestId]);
+    if(requests.length!==1)throw Error('Not found');
+    const {rows:events}=await client.query(
+     'SELECT actor_id,event,occurred_at FROM one_runtime.governance_audit WHERE tenant_id=$1 AND request_id=$2 ORDER BY id',
+     [tenantId,requestId]);
+    const request=requests[0];
+    const expected=request.status==='pending'?['registered']:['registered',request.status];
+    const consistent=events.length===expected.length&&events.every((event,i)=>
+     event.event===expected[i]&&
+     (i===0?event.actor_id===request.requested_by:
+      request.status==='expired'?Boolean(event.actor_id):event.actor_id===request.decided_by))&&
+     (request.status==='pending'?request.decided_by===null&&request.decided_at===null:
+      request.status==='expired'?request.decided_by===null&&request.decided_at!==null:
+      request.decided_by!==null&&request.decided_at!==null);
+    return {id:requestId,status:request.status,consistent,evidenceCount:events.length,
+     blockers:consistent?[]:['governance-evidence-mismatch'],executable:false};
+   });
+  },
   async expire({token,tenantId,requestId}){
    if(!validId(tenantId)||!validId(requestId))throw Error('Invalid request');
    return transaction({token,tenantId},async(client,principal)=>{
