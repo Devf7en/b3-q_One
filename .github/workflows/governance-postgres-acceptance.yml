@@ -76,3 +76,14 @@ jobs:
             exit 1
           fi
           echo 'Read-only inventory distinguishes current and legacy schemas'
+
+      - name: Verify legacy upgrade preserves governance records
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: test-only-password
+          PGDATABASE: governance_acceptance
+        run: |
+          psql -v ON_ERROR_STOP=1 -c 'CREATE DATABASE governance_upgrade'
+          psql -v ON_ERROR_STOP=1 -d governance_upgrade -f tests/governance-legacy-migration.sql
