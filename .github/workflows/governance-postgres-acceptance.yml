@@ -1,0 +1,35 @@
+name: Governance PostgreSQL acceptance
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  governance-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only-password
+          POSTGRES_DB: governance_acceptance
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d governance_acceptance"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Verify governance SQL against PostgreSQL
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: test-only-password
+          PGDATABASE: governance_acceptance
+        run: psql -v ON_ERROR_STOP=1 -f tests/governance-postgres-acceptance.sql
