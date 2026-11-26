@@ -68,4 +68,12 @@ test('read-only reconciliation verifies request and audit lifecycle evidence',as
  const bad=await records.inspect({token:'fixture',tenantId,requestId});
  assert.equal(bad.consistent,false);
  assert.deepEqual(bad.blockers,['governance-evidence-mismatch']);
+ events=[{actor_id:operator,event:'registered',occurred_at:'2026-11-27T00:00:00Z'},
+  {actor_id:approver,event:'approved',occurred_at:'2026-11-26T00:00:00Z'}];
+ const reversed=await records.inspect({token:'fixture',tenantId,requestId});
+ assert.equal(reversed.consistent,false);
+ events=[{actor_id:operator,event:'registered',occurred_at:'invalid'},
+  {actor_id:approver,event:'approved',occurred_at:'2026-11-26T00:00:00Z'}];
+ const malformed=await records.inspect({token:'fixture',tenantId,requestId});
+ assert.equal(malformed.consistent,false);
 });
