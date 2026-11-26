@@ -40,3 +40,16 @@ CREATE POLICY governance_audit_tenant ON one_runtime.governance_audit
  WITH CHECK (tenant_id = nullif(current_setting('one.tenant_id',true),'')::uuid);
 -- Migration operator must explicitly grant only required privileges to the
 -- non-owner runtime role. Never grant TRUNCATE or broad schema ownership.
+
+-- Immutable audit history: database enforcement also protects against accidental
+-- UPDATE/DELETE by privileged maintenance sessions (superusers can override).
+CREATE OR REPLACE FUNCTION one_runtime.reject_governance_audit_mutation()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ RAISE EXCEPTION 'Governance audit events are append-only' USING ERRCODE='42501';
+END;
+$$;
+DROP TRIGGER IF EXISTS governance_audit_immutable ON one_runtime.governance_audit;
+CREATE TRIGGER governance_audit_immutable
+BEFORE UPDATE OR DELETE ON one_runtime.governance_audit
+FOR EACH ROW EXECUTE FUNCTION one_runtime.reject_governance_audit_mutation();
