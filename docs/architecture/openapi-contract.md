@@ -1,0 +1,3 @@
+# One::API contract
+
+Canonical OpenAPI 3.1 JSON describes the six implemented dispatcher operations. No production server URL or execution endpoint is advertised. Bearer authentication and explicit tenant header are required; server membership remains authoritative. Read results are capped at 100 without pagination. Governance success never enables execution. Error responses use a generic error envelope; status-specific refinements and full response schemas remain pending. Structural tests guard the read-only Observatory and operation count; full OpenAPI validation and live contract conformance remain future acceptance gates. SDK and AI tool generation must not bypass authorization.

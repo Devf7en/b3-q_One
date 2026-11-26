@@ -1,0 +1,3 @@
+# Governed intent-to-provisioning
+
+The consolidated planner accepts explicit structured inputs and retains the original intent as descriptive text. It does not parse natural language or call an AI model. It composes a factory, evaluates cost, capacity, recovery and security fixtures, and orders a generic workflow. Logical component dependencies and provider availability remain unverified. All outputs are simulations; passing gates only permit simulation review. Production requires server-authoritative inputs, immutable plan and artifact identities, authenticated fresh evidence, tenant-scoped policy, approval binding, idempotency, audit, provider adapters, verification and rollback. Never convert untrusted intent into executable shell. No live provisioning is enabled.

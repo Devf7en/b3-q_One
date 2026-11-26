@@ -1,0 +1,3 @@
+# One Infrastructure — local development
+
+Run from repository root with Docker Compose v2: export ONE_DB_PASSWORD using a locally generated secret, then docker compose up -d --build --wait. Open http://127.0.0.1:4173. Application is a read-only demonstration shell; PostgreSQL is on an isolated internal network, not connected to the application yet. Database migrations are tested separately in CI, not auto-applied to persistent volumes. Stop with docker compose down (retain data). Never use down -v on valuable data. Container CI uses disposable credentials and volumes. No production DNS, proxy, provider execution or real authentication is configured. Next: trusted transaction adapter, restricted database roles, migration runner and browser acceptance.

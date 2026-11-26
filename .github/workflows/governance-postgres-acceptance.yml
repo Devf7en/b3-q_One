@@ -1,0 +1,89 @@
+name: Governance PostgreSQL acceptance
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  governance-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only-password
+          POSTGRES_DB: governance_acceptance
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d governance_acceptance"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Verify governance SQL against PostgreSQL
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: test-only-password
+          PGDATABASE: governance_acceptance
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/governance-postgres-acceptance.sql
+          psql -v ON_ERROR_STOP=1 -f packages/governance-records/migrations/001-preflight.sql
+
+      - name: Verify preflight rejects legacy governance schema
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: test-only-password
+          PGDATABASE: governance_acceptance
+        run: |
+          psql -v ON_ERROR_STOP=1 -c 'CREATE DATABASE governance_legacy'
+          psql -v ON_ERROR_STOP=1 -d governance_legacy -c 'CREATE SCHEMA one_runtime'
+          psql -v ON_ERROR_STOP=1 -d governance_legacy -c 'CREATE TABLE one_runtime.governance_requests (tenant_id uuid, id uuid, status text)'
+          psql -v ON_ERROR_STOP=1 -d governance_legacy -c 'CREATE TABLE one_runtime.governance_audit (tenant_id uuid, request_id uuid, event text)'
+          if psql -v ON_ERROR_STOP=1 -d governance_legacy -f packages/governance-records/migrations/001-preflight.sql > legacy-preflight.log 2>&1; then
+            echo 'ERROR: preflight accepted an incompatible legacy schema'
+            exit 1
+          fi
+          cat legacy-preflight.log
+          if ! grep -q 'Governance requests missing columns:' legacy-preflight.log; then
+            echo 'ERROR: preflight failed for an unexpected reason'
+            exit 1
+          fi
+          echo 'Expected rejection of incompatible legacy schema confirmed'
+      - name: Verify read-only schema inventory on current and legacy databases
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: test-only-password
+          PGDATABASE: governance_acceptance
+        run: |
+          psql -v ON_ERROR_STOP=1 -f packages/governance-records/migrations/002-inventory.sql > current-inventory.log
+          psql -v ON_ERROR_STOP=1 -d governance_legacy -f packages/governance-records/migrations/002-inventory.sql > legacy-inventory.log
+          grep -q 'governance_requests' current-inventory.log
+          grep -q 'governance_requests' legacy-inventory.log
+          grep -q 'expires_at' current-inventory.log
+          if grep -q 'expires_at' legacy-inventory.log; then
+            echo 'ERROR: legacy inventory unexpectedly reports expiry column'
+            exit 1
+          fi
+          echo 'Read-only inventory distinguishes current and legacy schemas'
+
+      - name: Verify legacy upgrade preserves governance records
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: test-only-password
+          PGDATABASE: governance_acceptance
+        run: |
+          psql -v ON_ERROR_STOP=1 -c 'CREATE DATABASE governance_upgrade'
+          psql -v ON_ERROR_STOP=1 -d governance_upgrade -f tests/governance-legacy-migration.sql

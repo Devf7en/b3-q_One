@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {createDataRuntime} from '../packages/data-runtime/index.mjs';
+const tenantId='00000000-0000-0000-0000-000000000001',userId='00000000-0000-0000-0000-000000000002';
+function fixture(role='operator'){const calls=[];const client={query:async(sql,args)=>{calls.push([sql,args]);return {rows:[{role}]};},release:x=>calls.push(['release',x])};return {calls,run:createDataRuntime({pool:{connect:async()=>client},authenticate:async()=>({tenantId,userId,role:'operator'})})};}
+test('transaction binds tenant and commits',async()=>{const {run,calls}=fixture();assert.equal(await run({token:'fixture',tenantId},async()=>42),42);assert.deepEqual(calls[1][1],[tenantId]);assert.equal(calls.at(-2)[0],'COMMIT');assert.deepEqual(calls.at(-1),['release',false]);});
+test('rollback on failure and changed membership',async()=>{for(const role of ['operator','viewer']){const {run,calls}=fixture(role);await assert.rejects(run({token:'fixture',tenantId},async()=>{throw Error('failure');}));assert.equal(calls.at(-2)[0],'ROLLBACK');}});
+test('rejects invalid tenant before connection',async()=>{const {run,calls}=fixture();await assert.rejects(run({tenantId:'bad'},async()=>{}));assert.equal(calls.length,0);});

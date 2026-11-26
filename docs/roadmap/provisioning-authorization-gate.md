@@ -1,0 +1,49 @@
+# Provisioning authorization gate — engineering acceptance
+
+Status: **development / non-executable**. This document does not authorize deployment, infrastructure changes or execution.
+
+## Trust boundaries
+1. A trusted server verifies token issuer, audience, expiry and authoritative tenant membership.
+2. The tenant-scoped PostgreSQL transaction rechecks locked membership and applies row-level security.
+3. Governance request registration, decision and expiry write audit records in the same transaction.
+4. Read-only inspection reconciles request status with audit event sequence, actor identity and timestamps.
+5. Provisioning authorization assessment requires matching request ID, operation, target, approved status, unexpired database evidence and no reconciliation blockers.
+6. The assessment returns `executable:false` unconditionally. There is no provisioning execution adapter in this boundary.
+
+## Fail-closed conditions
+- Missing/invalid identity or tenant membership, including membership changes
+- Missing governance request or audit history
+- Pending, rejected or expired status; approval expiry
+- Mismatched request ID, operation or target
+- Incorrect actor, malformed timestamps or out-of-order audit events
+- Database failure or evidence inspection error
+
+## Verification evidence
+- `tests/governance-records.test.mjs`: role checks, lifecycle, evidence inspection
+- `tests/provisioning-authorization.test.mjs`: assessment fail-closed cases
+- `tests/provisioning-authorization-integration.test.mjs`: integration through tenant-scoped inspector mock
+- `tests/governance-postgres-acceptance.sql`: actual PostgreSQL RLS, audit immutability, expiry and evidence fixtures
+- `.github/workflows/governance-postgres-acceptance.yml`: PostgreSQL 16 CI
+
+## Outstanding release blockers
+- Verify all workflows against latest commit, not only earlier commits.
+- Test end-to-end authorization with a real PostgreSQL-backed authenticated runtime, not just isolated SQL and mocked transactions.
+- Enforce production database grants and migration ownership separation; document rollback.
+- Bind any future adapter to a fresh, single-use authorization inside its execution transaction; prevent replay and time-of-check/time-of-use races.
+- Add independent approval and deployment/release authorization; never infer permission to deploy from an approved governance record alone.
+- Obtain explicit production deployment approval.
+
+## Migration compatibility and safety
+The current governance schema uses `CREATE TABLE IF NOT EXISTS`. That statement **does not upgrade existing tables**. In particular, an installation predating expiry support may lack `expires_at` and the `expired` status constraint. Do not run this schema as a production upgrade and assume it has migrated existing records.
+
+Before any staging migration:
+1. Inventory current table definitions, constraints, policies, triggers, roles and data.
+2. Prepare an explicit, reviewed, versioned migration that adds expiry with a documented policy for existing pending requests and replaces status/event constraints safely.
+3. Validate upgrade and rollback on an isolated copy, including concurrent request processing and existing audit rows.
+4. Verify runtime role grants, RLS and trigger ownership after migration; prohibit runtime ownership and TRUNCATE.
+5. Capture migration evidence and obtain separate deployment approval.
+
+A passing fresh-database CI run does **not** demonstrate safe upgrades of existing installations.
+
+## Experimental legacy migration candidate
+`packages/governance-records/migrations/003-legacy-expiry-upgrade.sql` is an **unverified candidate**, not an approved migration. It assumes a specific pre-expiry schema and intentionally makes all legacy pending requests immediately ineligible for approval. It does not yet replace every legacy lifecycle constraint, upgrade audit event constraints, or validate all migration rollback scenarios. Do not apply it to any real installation. The next acceptance step is to build a faithful legacy fixture, execute the migration and validate both historical preservation and expiry transitions; revise the candidate based on the results.

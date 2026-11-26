@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import pg from 'pg';
+import {generateKeyPair,exportJWK,SignJWT} from 'jose';
+import {createOperationalRuntime} from '../packages/operational-runtime/index.mjs';
+const admin=new pg.Pool(),identityPool=new pg.Pool({user:'one_http_identity',password:'ci-only-identity'}),servicePool=new pg.Pool({user:'one_http_service',password:'ci-only-service'});
+const id=n=>'00000000-0000-0000-0000-'+String(n).padStart(12,'0');
+const t=id(1),other=id(2),operator=id(3),approver=id(4),project=id(5),issuer='https://issuer.example',audience='one';
+let server;
+try{
+ await admin.query("CREATE ROLE one_http_identity LOGIN PASSWORD 'ci-only-identity' IN ROLE one_identity");
+ await admin.query("CREATE ROLE one_http_service LOGIN PASSWORD 'ci-only-service' IN ROLE one_service");
+ await admin.query("INSERT INTO one_runtime.tenants VALUES ($1,'A'),($2,'B')",[t,other]);
+ await admin.query("INSERT INTO one_runtime.identities VALUES ($1,$3,'operator'),($2,$3,'approver')",[operator,approver,issuer]);
+ await admin.query("INSERT INTO one_runtime.memberships VALUES ($1,$2,'operator'),($1,$3,'approver')",[t,operator,approver]);
+ await admin.query("INSERT INTO one_runtime.projects VALUES ($1,$3,'A'),($2,$3,'B')",[t,other,project]);
+ const key=await generateKeyPair('RS256'),jwk={...await exportJWK(key.publicKey),kid:'fixture',alg:'RS256'};
+ const sign=sub=>new SignJWT({sub}).setIssuer(issuer).setAudience(audience).setIssuedAt().setExpirationTime('5m').setProtectedHeader({alg:'RS256',kid:'fixture',typ:'at+jwt'}).sign(key.privateKey);
+ const op=await sign('operator'),reviewer=await sign('approver');
+ server=createOperationalRuntime({identityPool,servicePool,oidc:{issuer,audience,jwksUri:issuer+'/jwks',fetcher:async()=>new Response(JSON.stringify({keys:[jwk]}),{status:200})}});
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ const request=(path,token=op,tenant=t,body)=>fetch('http://127.0.0.1:'+server.address().port+'/v1/'+path,{method:body?'POST':'GET',headers:{authorization:'Bearer '+token,'x-tenant-id':tenant,'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+ assert.equal((await request('control/projects','invalid')).status,401);
+ assert.equal((await request('control/projects',op,other)).status,401);
+ const read=await request('observatory/projects');assert.equal(read.status,200);assert.deepEqual((await read.json()).records,[{id:project,name:'A'}]);
+ const stamp=new Date().toISOString(),old=new Date(Date.now()-600000).toISOString();
+ await admin.query("INSERT INTO one_runtime.evidence(tenant_id,id,project_id,source,observed_at,state,payload) VALUES ($1,$3,$6,'docker-cli:containers',$7,'live','{}'),($1,$4,$6,'docker-cli:containers',$8,'live','{}'),($2,$5,$6,'private-other',$7,'live','{}')",[t,other,id(10),id(11),id(12),project,stamp,old]);
+ for(const surface of ['control','observatory']){
+ const response=await request(surface+'/evidence');assert.equal(response.status,200);const evidence=await response.json();assert.equal(evidence.truncated,false);assert.equal(evidence.records.length,2);assert.equal(evidence.records[0].state,'live');assert.equal(evidence.records[1].state,'cached');assert.ok(evidence.records.every(x=>x.verified===false&&x.source==='docker-cli:containers'));
+ }
+ assert.equal((await request('observatory/evidence',op,other)).status,401);
+ assert.equal((await request('observatory/evidence',op,t,{})).status,405);
+ const first=await (await request('observatory/evidence?limit=1')).json();assert.equal(first.records.length,1);assert.equal(first.truncated,true);assert.equal(first.nextCursor,id(10));
+ const second=await (await request('observatory/evidence?limit=1&after='+first.nextCursor)).json();assert.equal(second.records[0].id,id(11));assert.equal(second.nextCursor,null);
+ assert.equal((await request('observatory/evidence?after='+id(12))).status,400);
+ assert.equal((await request('observatory/evidence?limit=101')).status,400);
+ const input={projectId:project,manifest:{kind:'simulation'}};
+ assert.equal((await request('observatory/plans',op,t,input)).status,403);
+ const created=await request('control/plans',op,t,input);assert.equal(created.status,201);
+ const plan=await created.json();assert.equal(plan.executable,false);
+ const path='control/plans/'+plan.record.id+'/approve',approval={version:1,expectedDigest:plan.record.digest};
+ assert.equal((await request(path,op,t,approval)).status,403);
+ const approved=await request(path,reviewer,t,approval);assert.equal(approved.status,201);assert.equal((await approved.json()).executable,false);
+ assert.equal((await request(path,reviewer,t,approval)).status,409);
+ assert.equal((await admin.query('SELECT * FROM one_runtime.audit_events')).rowCount,2);
+ console.log('Authenticated HTTP, tenant isolation, independent approval and audit acceptance passed');
+}finally{if(server){server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}await Promise.all([admin.end(),identityPool.end(),servicePool.end()]);}

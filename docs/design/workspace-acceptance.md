@@ -1,0 +1,3 @@
+# Workspace acceptance gates
+
+Every W01–W18 workspace must retain its approved visual direction and functional scope. Verify distinct layout, panel completeness, independent themes, context continuity, keyboard access, responsive behavior, tenant/user layout persistence, evidence labels and server-side permission enforcement. Record screenshots at desktop/tablet/mobile sizes. Compare against exact archived references when recovered; missing originals block visual fidelity sign-off, not unrelated development. Do not claim docking, persistence, live metrics or integrations until tested. No workspace may be removed to pass acceptance.

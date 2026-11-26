@@ -1,0 +1,85 @@
+{
+  "version": "1.0.0",
+  "factories": [
+    {
+      "id": "web",
+      "version": "0.1.0",
+      "components": [
+        "hosting",
+        "dns",
+        "tls",
+        "database"
+      ],
+      "state": "demonstration"
+    },
+    {
+      "id": "commerce",
+      "version": "0.1.0",
+      "components": [
+        "storefront",
+        "payments",
+        "crm",
+        "analytics"
+      ],
+      "state": "demonstration"
+    },
+    {
+      "id": "ai",
+      "version": "0.1.0",
+      "components": [
+        "model",
+        "agent",
+        "vector-database"
+      ],
+      "state": "demonstration"
+    },
+    {
+      "id": "developer",
+      "version": "0.1.0",
+      "components": [
+        "repository",
+        "pipeline",
+        "container",
+        "staging"
+      ],
+      "state": "demonstration"
+    },
+    {
+      "id": "academia",
+      "version": "0.1.0",
+      "components": [
+        "sis",
+        "lms",
+        "hris"
+      ],
+      "state": "demonstration"
+    },
+    {
+      "id": "enterprise",
+      "version": "0.1.0",
+      "components": [
+        "erp",
+        "crm",
+        "bpm",
+        "bi"
+      ],
+      "state": "demonstration"
+    },
+    {
+      "id": "automation",
+      "version": "0.1.0",
+      "components": [
+        "workflow",
+        "trigger",
+        "api"
+      ],
+      "state": "demonstration"
+    },
+    {
+      "id": "custom",
+      "version": "0.1.0",
+      "components": [],
+      "state": "demonstration"
+    }
+  ]
+}

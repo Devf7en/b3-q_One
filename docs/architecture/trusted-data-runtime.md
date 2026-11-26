@@ -1,0 +1,3 @@
+# Trusted data runtime — 13C.2
+
+Server-only dependency-injected PostgreSQL transaction boundary. Authenticate before checkout, set tenant context transaction-locally using a parameter, recheck and lock membership, commit or rollback, discard client if rollback fails. Work callbacks are trusted server code only; never expose raw SQL to clients. Requires a real PostgreSQL pool and verified identity adapter, restricted role grants (including membership locking privileges), and integration tests. Fixture tests do not prove real driver behavior. No application database connection or execution enabled. Next: transactional plan/approval/audit repositories and real database integration acceptance.

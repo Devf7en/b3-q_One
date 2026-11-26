@@ -1,0 +1,3 @@
+# Sprint 13A runtime acceptance
+
+The command pane now exposes a structured provisioning simulation with editable assumptions. No natural-language parsing, provider calls or execution. Security evidence defaults to empty and recovery verification false. Switching to Observatory hides and clears the planner. HTTP module graph tests cover module delivery and mutation denial; they do not prove DOM interaction, accessibility or visual fidelity. Next: real browser automation across all 18 workspaces, theme and layout persistence, reciprocal surfaces, error handling and mobile acceptance. No production release until authorization and provider controls are implemented.

@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+const read=n=>JSON.parse(readFileSync(new URL('../packages/contracts/'+n+'.json',import.meta.url)));
+test('every workspace has a distinct layout profile without dropping registered panels',()=>{const w=read('workspaces').workspaces,p=read('workspace-layouts').presets;assert.equal(p.length,w.length);assert.equal(new Set(p.map(x=>x.visualProfile)).size,w.length);for(const item of w){const layout=p.find(x=>x.workspaceId===item.id);assert.ok(layout);assert.deepEqual(layout.panels.map(x=>x.id),item.panels);assert.ok(layout.panels.every(x=>[1,2].includes(x.span)));}});

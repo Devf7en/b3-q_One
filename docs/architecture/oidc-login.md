@@ -1,0 +1,2 @@
+# OIDC login transaction
+Bounded process-local one-time state, nonce, S256 PKCE and browser binding cookie. HTTPS endpoints only. Trusted exchange and identity verifier must validate issuer, audience, signature, nonce, token subject binding and token response. Session issuance must enforce expectedSubject before this flow is wired. No provider configured, no callback route deployed. Production needs provider-specific token exchange, access/ID token subject matching, callback tests, TLS and login rate limits.

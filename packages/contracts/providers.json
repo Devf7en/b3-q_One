@@ -1,0 +1,95 @@
+{
+  "version": "1.0.0",
+  "providers": [
+    {
+      "id": "aws",
+      "candidateCapabilities": [
+        "compute",
+        "storage",
+        "network"
+      ],
+      "connected": false,
+      "state": "planned"
+    },
+    {
+      "id": "azure",
+      "candidateCapabilities": [
+        "compute",
+        "storage",
+        "network"
+      ],
+      "connected": false,
+      "state": "planned"
+    },
+    {
+      "id": "gcp",
+      "candidateCapabilities": [
+        "compute",
+        "storage",
+        "network"
+      ],
+      "connected": false,
+      "state": "planned"
+    },
+    {
+      "id": "digitalocean",
+      "candidateCapabilities": [
+        "compute",
+        "storage"
+      ],
+      "connected": false,
+      "state": "planned"
+    },
+    {
+      "id": "hetzner",
+      "candidateCapabilities": [
+        "compute",
+        "network"
+      ],
+      "connected": false,
+      "state": "planned"
+    },
+    {
+      "id": "hostinger",
+      "candidateCapabilities": [
+        "hosting",
+        "compute"
+      ],
+      "connected": false,
+      "state": "planned"
+    },
+    {
+      "id": "cloudflare",
+      "candidateCapabilities": [
+        "dns",
+        "edge"
+      ],
+      "connected": false,
+      "state": "planned"
+    },
+    {
+      "id": "local-docker",
+      "candidateCapabilities": [
+        "containers"
+      ],
+      "connected": false,
+      "state": "planned"
+    },
+    {
+      "id": "private-vps",
+      "candidateCapabilities": [
+        "compute"
+      ],
+      "connected": false,
+      "state": "planned"
+    },
+    {
+      "id": "file-transfer",
+      "candidateCapabilities": [
+        "hosting"
+      ],
+      "connected": false,
+      "state": "planned"
+    }
+  ]
+}

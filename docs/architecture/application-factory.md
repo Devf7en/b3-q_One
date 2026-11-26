@@ -1,0 +1,3 @@
+# Application Factory W18
+
+Eight versioned demonstration factory families define logical components, not deployable images or licensed products. Custom compositions accept validated component identifiers. Every manifest is non-executable and requires dependency, cost, security, capacity, recovery, authorization and approval reviews. Future templates require immutable artifact references, dependency graphs, license checks, provider adapters, secrets references, rollback and evidence. Academia and Enterprise are integration targets for existing b3Ɛq systems, not replacements. Preserve W18 visual baseline.

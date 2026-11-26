@@ -1,0 +1,3 @@
+# One::API — gateway foundation
+
+Server-only request dispatcher with injected trusted authentication, data transaction and governance services. Routes GET /v1/{control|observatory}/projects and /plans; POST /v1/control/plans and /v1/control/plans/{id}/approve. Surface is derived from route; role from verified identity. No execution endpoint. This is not a listening HTTP server. Before deployment add bounded HTTP body parsing, TLS, rate limits, real OIDC verification, session/CSRF policy, typed service errors, pagination and integration acceptance. A failed or ambiguous commit must be reconciled before retrying. Do not expose the dispatcher directly to untrusted callers.
