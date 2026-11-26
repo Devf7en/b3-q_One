@@ -26,7 +26,7 @@ RESET ROLE;
 GRANT UPDATE,DELETE ON one_runtime.governance_audit TO one_governance_test;
 SET ROLE one_governance_test;
 SELECT set_config('one.tenant_id','00000000-0000-0000-0000-000000000001',true);
-DO $ BEGIN
+DO $audit$ BEGIN
  BEGIN
   UPDATE one_runtime.governance_audit SET event='approved';
   RAISE EXCEPTION 'audit update unexpectedly allowed';
@@ -39,7 +39,7 @@ DO $ BEGIN
  EXCEPTION WHEN insufficient_privilege THEN
   IF SQLSTATE <> '42501' THEN RAISE; END IF;
  END;
-END $;
+END $audit$;
 SAVEPOINT before_self_approval;
 DO $$ BEGIN
  BEGIN
