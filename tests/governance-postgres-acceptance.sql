@@ -49,6 +49,41 @@ DO $$ BEGIN
  END;
 END $$;
 ROLLBACK TO SAVEPOINT before_self_approval;
+-- Lifecycle: a request past its deadline cannot be approved, and expiry is terminal.
+UPDATE one_runtime.governance_requests SET expires_at=now()-interval '1 minute'
+ WHERE tenant_id='00000000-0000-0000-0000-000000000001'
+ AND id='00000000-0000-0000-0000-000000000003';
+DO $lifecycle$ DECLARE changed integer;
+BEGIN
+ UPDATE one_runtime.governance_requests SET status='approved',
+ decided_by='00000000-0000-0000-0000-000000000004',decided_at=now()
+ WHERE tenant_id='00000000-0000-0000-0000-000000000001'
+ AND id='00000000-0000-0000-0000-000000000003'
+ AND status='pending' AND expires_at>now()
+ AND requested_by<>'00000000-0000-0000-0000-000000000004';
+ GET DIAGNOSTICS changed=ROW_COUNT;
+ IF changed<>0 THEN RAISE EXCEPTION 'expired request approved'; END IF;
+ UPDATE one_runtime.governance_requests SET status='expired',decided_at=now()
+ WHERE tenant_id='00000000-0000-0000-0000-000000000001'
+ AND id='00000000-0000-0000-0000-000000000003'
+ AND status='pending' AND expires_at<=now();
+ GET DIAGNOSTICS changed=ROW_COUNT;
+ IF changed<>1 THEN RAISE EXCEPTION 'expiry transition failed'; END IF;
+END $lifecycle$;
+INSERT INTO one_runtime.governance_audit(tenant_id,request_id,actor_id,event)
+VALUES ('00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000002','expired');
+DO $terminal$ DECLARE changed integer;
+BEGIN
+ UPDATE one_runtime.governance_requests SET status='approved',
+ decided_by='00000000-0000-0000-0000-000000000004',decided_at=now()
+ WHERE tenant_id='00000000-0000-0000-0000-000000000001'
+ AND id='00000000-0000-0000-0000-000000000003'
+ AND status='pending';
+ GET DIAGNOSTICS changed=ROW_COUNT;
+ IF changed<>0 THEN RAISE EXCEPTION 'terminal expiry was reversed'; END IF;
+ IF (SELECT count(*) FROM one_runtime.governance_audit WHERE event='expired')<>1
+ THEN RAISE EXCEPTION 'expiry audit missing'; END IF;
+END $terminal$;
 SELECT set_config('one.tenant_id','00000000-0000-0000-0000-000000000009',true);
 DO $$ BEGIN
  IF EXISTS(SELECT 1 FROM one_runtime.governance_requests) THEN RAISE EXCEPTION 'cross tenant request visible'; END IF;
