@@ -44,3 +44,6 @@ Before any staging migration:
 5. Capture migration evidence and obtain separate deployment approval.
 
 A passing fresh-database CI run does **not** demonstrate safe upgrades of existing installations.
+
+## Experimental legacy migration candidate
+`packages/governance-records/migrations/003-legacy-expiry-upgrade.sql` is an **unverified candidate**, not an approved migration. It assumes a specific pre-expiry schema and intentionally makes all legacy pending requests immediately ineligible for approval. It does not yet replace every legacy lifecycle constraint, upgrade audit event constraints, or validate all migration rollback scenarios. Do not apply it to any real installation. The next acceptance step is to build a faithful legacy fixture, execute the migration and validate both historical preservation and expiry transitions; revise the candidate based on the results.
