@@ -34,7 +34,7 @@ export function createGovernanceRecords({transaction}){
    return transaction({token,tenantId},async(client,principal)=>{
     if(!['viewer','operator','approver'].includes(principal.role))throw Error('Forbidden');
     const {rows:requests}=await client.query(
-     'SELECT id,status,requested_by,decided_by,decided_at,expires_at FROM one_runtime.governance_requests WHERE tenant_id=$1 AND id=$2',
+     'SELECT id,status,operation,target,requested_by,decided_by,decided_at,expires_at,(expires_at>NOW()) AS unexpired FROM one_runtime.governance_requests WHERE tenant_id=$1 AND id=$2',
      [tenantId,requestId]);
     if(requests.length!==1)throw Error('Not found');
     const {rows:events}=await client.query(
@@ -51,7 +51,7 @@ export function createGovernanceRecords({transaction}){
      (request.status==='pending'?request.decided_by===null&&request.decided_at===null:
       request.status==='expired'?request.decided_by===null&&request.decided_at!==null:
       request.decided_by!==null&&request.decided_at!==null);
-    return {id:requestId,status:request.status,consistent,evidenceCount:events.length,
+    return {id:requestId,status:request.status,operation:request.operation,target:request.target,unexpired:request.unexpired===true,consistent,evidenceCount:events.length,
      blockers:consistent?[]:['governance-evidence-mismatch'],executable:false};
    });
   },
