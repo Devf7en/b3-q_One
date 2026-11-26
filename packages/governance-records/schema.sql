@@ -7,13 +7,15 @@ CREATE TABLE IF NOT EXISTS one_runtime.governance_requests (
  target text NOT NULL CHECK(length(target) BETWEEN 1 AND 512),
  reason text NOT NULL CHECK(length(reason) BETWEEN 1 AND 512),
  requested_by uuid NOT NULL,
- status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
+ status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected','expired')),
+ expires_at timestamptz NOT NULL DEFAULT (now() + interval '24 hours'),
  decided_by uuid,
  decided_at timestamptz,
  created_at timestamptz NOT NULL DEFAULT now(),
  PRIMARY KEY(tenant_id,id),
  CHECK ((status='pending' AND decided_by IS NULL AND decided_at IS NULL)
-     OR (status<>'pending' AND decided_by IS NOT NULL AND decided_at IS NOT NULL)),
+     OR (status IN ('approved','rejected') AND decided_by IS NOT NULL AND decided_at IS NOT NULL)
+     OR (status='expired' AND decided_by IS NULL AND decided_at IS NOT NULL)),
  CHECK(decided_by IS NULL OR decided_by<>requested_by)
 );
 CREATE TABLE IF NOT EXISTS one_runtime.governance_audit (
@@ -21,7 +23,7 @@ CREATE TABLE IF NOT EXISTS one_runtime.governance_audit (
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  request_id uuid NOT NULL,
  actor_id uuid NOT NULL,
- event text NOT NULL CHECK(event IN ('registered','approved','rejected')),
+ event text NOT NULL CHECK(event IN ('registered','approved','rejected','expired')),
  occurred_at timestamptz NOT NULL DEFAULT now(),
  FOREIGN KEY(tenant_id,request_id) REFERENCES one_runtime.governance_requests(tenant_id,id)
 );
