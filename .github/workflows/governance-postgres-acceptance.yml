@@ -32,4 +32,6 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: test-only-password
           PGDATABASE: governance_acceptance
-        run: psql -v ON_ERROR_STOP=1 -f tests/governance-postgres-acceptance.sql
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/governance-postgres-acceptance.sql
+          psql -v ON_ERROR_STOP=1 -f packages/governance-records/migrations/001-preflight.sql
