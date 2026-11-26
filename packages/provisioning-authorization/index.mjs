@@ -1,6 +1,6 @@
 // Read-only authorization assessment. No execution adapter or credential handling.
 // The inspector must be the server-side authenticated governance records boundary.
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function createProvisioningAuthorization({inspect}={}){
  if(typeof inspect!=='function')throw Error('Authenticated governance inspector required');
  return Object.freeze({
