@@ -58,3 +58,21 @@ jobs:
             exit 1
           fi
           echo 'Expected rejection of incompatible legacy schema confirmed'
+      - name: Verify read-only schema inventory on current and legacy databases
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: test-only-password
+          PGDATABASE: governance_acceptance
+        run: |
+          psql -v ON_ERROR_STOP=1 -f packages/governance-records/migrations/002-inventory.sql > current-inventory.log
+          psql -v ON_ERROR_STOP=1 -d governance_legacy -f packages/governance-records/migrations/002-inventory.sql > legacy-inventory.log
+          grep -q 'governance_requests' current-inventory.log
+          grep -q 'governance_requests' legacy-inventory.log
+          grep -q 'expires_at' current-inventory.log
+          if grep -q 'expires_at' legacy-inventory.log; then
+            echo 'ERROR: legacy inventory unexpectedly reports expiry column'
+            exit 1
+          fi
+          echo 'Read-only inventory distinguishes current and legacy schemas'
