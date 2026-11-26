@@ -84,6 +84,58 @@ BEGIN
  IF (SELECT count(*) FROM one_runtime.governance_audit WHERE event='expired')<>1
  THEN RAISE EXCEPTION 'expiry audit missing'; END IF;
 END $terminal$;
+-- Evidence reconciliation using actual tenant-scoped PostgreSQL rows.
+DO $evidence$ DECLARE request_status text; request_actor uuid; events text[]; actors uuid[];
+BEGIN
+ SELECT status,requested_by INTO request_status,request_actor
+ FROM one_runtime.governance_requests
+ WHERE tenant_id='00000000-0000-0000-0000-000000000001'
+ AND id='00000000-0000-0000-0000-000000000003';
+ SELECT array_agg(event ORDER BY id),array_agg(actor_id ORDER BY id)
+ INTO events,actors FROM one_runtime.governance_audit
+ WHERE tenant_id='00000000-0000-0000-0000-000000000001'
+ AND request_id='00000000-0000-0000-0000-000000000003';
+ IF request_status<>'expired' OR events<>ARRAY['registered','expired']::text[]
+ OR actors[1]<>request_actor OR actors[2] IS NULL
+ THEN RAISE EXCEPTION 'lifecycle evidence reconciliation failed'; END IF;
+END $evidence$;
+-- An absent terminal event must be detectable without mutating immutable audit.
+INSERT INTO one_runtime.governance_requests
+ (tenant_id,id,operation,target,reason,requested_by,status,decided_at,expires_at)
+ VALUES ('00000000-0000-0000-0000-000000000001',
+ '00000000-0000-0000-0000-000000000006','service.restart','staging',
+ 'missing audit fixture','00000000-0000-0000-0000-000000000002',
+ 'expired',now(),now()-interval '1 minute');
+INSERT INTO one_runtime.governance_audit(tenant_id,request_id,actor_id,event)
+ VALUES ('00000000-0000-0000-0000-000000000001',
+ '00000000-0000-0000-0000-000000000006',
+ '00000000-0000-0000-0000-000000000002','registered');
+DO $missing$ BEGIN
+ IF (SELECT array_agg(event ORDER BY id) FROM one_runtime.governance_audit
+ WHERE request_id='00000000-0000-0000-0000-000000000006')
+ = ARRAY['registered','expired']::text[]
+ THEN RAISE EXCEPTION 'missing expiry evidence not detected'; END IF;
+END $missing$;
+-- Decision actor mismatch must be detectable from stored rows.
+INSERT INTO one_runtime.governance_requests
+ (tenant_id,id,operation,target,reason,requested_by,status,decided_by,decided_at)
+ VALUES ('00000000-0000-0000-0000-000000000001',
+ '00000000-0000-0000-0000-000000000007','service.restart','staging',
+ 'actor mismatch fixture','00000000-0000-0000-0000-000000000002',
+ 'approved','00000000-0000-0000-0000-000000000004',now());
+INSERT INTO one_runtime.governance_audit(tenant_id,request_id,actor_id,event)
+ VALUES ('00000000-0000-0000-0000-000000000001',
+ '00000000-0000-0000-0000-000000000007',
+ '00000000-0000-0000-0000-000000000002','registered'),
+ ('00000000-0000-0000-0000-000000000001',
+ '00000000-0000-0000-0000-000000000007',
+ '00000000-0000-0000-0000-000000000005','approved');
+DO $mismatch$ BEGIN
+ IF (SELECT a.actor_id=r.decided_by FROM one_runtime.governance_audit a
+ JOIN one_runtime.governance_requests r ON r.tenant_id=a.tenant_id AND r.id=a.request_id
+ WHERE a.request_id='00000000-0000-0000-0000-000000000007' AND a.event='approved')
+ THEN RAISE EXCEPTION 'mismatched decision actor not detected'; END IF;
+END $mismatch$;
 SELECT set_config('one.tenant_id','00000000-0000-0000-0000-000000000009',true);
 DO $$ BEGIN
  IF EXISTS(SELECT 1 FROM one_runtime.governance_requests) THEN RAISE EXCEPTION 'cross tenant request visible'; END IF;
