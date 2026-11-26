@@ -32,3 +32,15 @@ Status: **development / non-executable**. This document does not authorize deplo
 - Bind any future adapter to a fresh, single-use authorization inside its execution transaction; prevent replay and time-of-check/time-of-use races.
 - Add independent approval and deployment/release authorization; never infer permission to deploy from an approved governance record alone.
 - Obtain explicit production deployment approval.
+
+## Migration compatibility and safety
+The current governance schema uses `CREATE TABLE IF NOT EXISTS`. That statement **does not upgrade existing tables**. In particular, an installation predating expiry support may lack `expires_at` and the `expired` status constraint. Do not run this schema as a production upgrade and assume it has migrated existing records.
+
+Before any staging migration:
+1. Inventory current table definitions, constraints, policies, triggers, roles and data.
+2. Prepare an explicit, reviewed, versioned migration that adds expiry with a documented policy for existing pending requests and replaces status/event constraints safely.
+3. Validate upgrade and rollback on an isolated copy, including concurrent request processing and existing audit rows.
+4. Verify runtime role grants, RLS and trigger ownership after migration; prohibit runtime ownership and TRUNCATE.
+5. Capture migration evidence and obtain separate deployment approval.
+
+A passing fresh-database CI run does **not** demonstrate safe upgrades of existing installations.
