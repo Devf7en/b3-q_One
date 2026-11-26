@@ -35,3 +35,21 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/governance-postgres-acceptance.sql
           psql -v ON_ERROR_STOP=1 -f packages/governance-records/migrations/001-preflight.sql
+
+      - name: Verify preflight rejects legacy governance schema
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: test-only-password
+          PGDATABASE: governance_acceptance
+        run: |
+          psql -v ON_ERROR_STOP=1 -c 'CREATE DATABASE governance_legacy'
+          psql -v ON_ERROR_STOP=1 -d governance_legacy -c 'CREATE SCHEMA one_runtime'
+          psql -v ON_ERROR_STOP=1 -d governance_legacy -c 'CREATE TABLE one_runtime.governance_requests (tenant_id uuid, id uuid, status text)'
+          psql -v ON_ERROR_STOP=1 -d governance_legacy -c 'CREATE TABLE one_runtime.governance_audit (tenant_id uuid, request_id uuid, event text)'
+          if psql -v ON_ERROR_STOP=1 -d governance_legacy -f packages/governance-records/migrations/001-preflight.sql; then
+            echo 'ERROR: preflight accepted an incompatible legacy schema'
+            exit 1
+          fi
+          echo 'Expected rejection of incompatible legacy schema confirmed'
