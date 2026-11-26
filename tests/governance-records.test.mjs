@@ -49,3 +49,23 @@ test('approval is gated by database expiry and expiry is audited',async()=>{
  await assert.rejects(fixture('operator',[]).records.expire({token:'fixture',tenantId,requestId}),/Not expired/);
  await assert.rejects(fixture('viewer').records.expire({token:'fixture',tenantId,requestId}),/Forbidden/);
 });
+
+test('read-only reconciliation verifies request and audit lifecycle evidence',async()=>{
+ const calls=[];
+ const principal={tenantId,userId:operator,role:'viewer'};
+ const request={id:requestId,status:'approved',requested_by:operator,decided_by:approver,decided_at:'2026-11-26T00:00:00Z',expires_at:'2026-11-27T00:00:00Z'};
+ let events=[{actor_id:operator,event:'registered',occurred_at:'2026-11-25T00:00:00Z'},{actor_id:approver,event:'approved',occurred_at:'2026-11-26T00:00:00Z'}];
+ const records=createGovernanceRecords({transaction:async(_context,work)=>work({query:async(sql,args)=>{
+  calls.push({sql,args});return {rows:sql.includes('governance_requests')?[request]:events};
+ }},principal)});
+ const good=await records.inspect({token:'fixture',tenantId,requestId});
+ assert.equal(good.consistent,true);
+ assert.equal(good.executable,false);
+ assert.equal(good.evidenceCount,2);
+ assert.equal(calls.length,2);
+ assert.ok(calls.every(x=>x.args[0]===tenantId&&x.args[1]===requestId));
+ events=[events[0],{...events[1],actor_id:operator}];
+ const bad=await records.inspect({token:'fixture',tenantId,requestId});
+ assert.equal(bad.consistent,false);
+ assert.deepEqual(bad.blockers,['governance-evidence-mismatch']);
+});
