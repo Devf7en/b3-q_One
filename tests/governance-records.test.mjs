@@ -36,3 +36,16 @@ test('rejects invalid inputs, duplicate registrations and missing decisions',asy
  await assert.rejects(fixture('approver',[]).records.decide({token:'fixture',tenantId,requestId,decision:'approved'}),/Not pending/);
  await assert.rejects(fixture('approver').records.decide({token:'fixture',tenantId,requestId,decision:'executed'}),/Invalid decision/);
 });
+
+test('approval is gated by database expiry and expiry is audited',async()=>{
+ const approval=fixture('approver',[{id:requestId,status:'approved'}]);
+ await approval.records.decide({token:'fixture',tenantId,requestId,decision:'approved'});
+ assert.match(approval.calls[0].sql,/expires_at>NOW\(\)/);
+ const expiry=fixture('operator',[{id:requestId,status:'expired'}]);
+ const result=await expiry.records.expire({token:'fixture',tenantId,requestId});
+ assert.deepEqual(result,{id:requestId,status:'expired',executable:false});
+ assert.match(expiry.calls[0].sql,/expires_at<=NOW\(\)/);
+ assert.equal(expiry.calls[1].args[3],'expired');
+ await assert.rejects(fixture('operator',[]).records.expire({token:'fixture',tenantId,requestId}),/Not expired/);
+ await assert.rejects(fixture('viewer').records.expire({token:'fixture',tenantId,requestId}),/Forbidden/);
+});
