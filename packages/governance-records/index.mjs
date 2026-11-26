@@ -46,6 +46,8 @@ export function createGovernanceRecords({transaction}){
      event.event===expected[i]&&
      (i===0?event.actor_id===request.requested_by:
       request.status==='expired'?Boolean(event.actor_id):event.actor_id===request.decided_by))&&
+     (events.length<2||new Date(events[0].occurred_at).getTime()<=new Date(events[1].occurred_at).getTime())&&
+     events.every(event=>Number.isFinite(new Date(event.occurred_at).getTime()))&&
      (request.status==='pending'?request.decided_by===null&&request.decided_at===null:
       request.status==='expired'?request.decided_by===null&&request.decided_at!==null:
       request.decided_by!==null&&request.decided_at!==null);
